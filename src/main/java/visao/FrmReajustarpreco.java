@@ -4,17 +4,82 @@
  */
 package visao;
 
+import cliente.ClienteRMI;
+import modelo.Produto;
+import service.EstoqueService;
+import javax.swing.JOptionPane;
+import java.rmi.RemoteException;
+import java.util.List;
+
 /**
  *
  * @author roger
  */
 public class FrmReajustarpreco extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
+    private javax.swing.JFrame janelaAnterior;
+    
     /**
      * Creates new form FrmReajustarpreco
      */
     public FrmReajustarpreco() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarProdutos();
+        }
+    }
+    
+    public FrmReajustarpreco(ClienteRMI cliente, javax.swing.JFrame anterior) {
+        initComponents();
+        this.clienteRMI = cliente;
+        this.janelaAnterior = anterior;
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarProdutos();
+        }
+    }
+    
+    private void carregarProdutos() {
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Produto> produtos = service.listarProdutos();
+            JCBProduto.removeAllItems();
+            for (Produto p : produtos) {
+                JCBProduto.addItem(p.getNome());
+            }
+            if (produtos.size() > 0) {
+                JCBProduto.setSelectedIndex(0);
+                atualizarPrecoAtual();
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
+        }
+    }
+    
+    private void atualizarPrecoAtual() {
+        try {
+            EstoqueService service = clienteRMI.getService();
+            String nomeProduto = (String) JCBProduto.getSelectedItem();
+            if (nomeProduto != null) {
+                Produto produto = service.buscarProdutoPorNome(nomeProduto);
+                if (produto != null) {
+                    JTFPrecoAtual.setText(String.format("%.2f", produto.getPreco()));
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao buscar preço: " + e.getMessage());
+        }
     }
 
     /**
@@ -49,12 +114,32 @@ public class FrmReajustarpreco extends javax.swing.JFrame {
         jLabel4.setText("Percentual:");
 
         JCBProduto.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        JCBProduto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JCBProdutoActionPerformed(evt);
+            }
+        });
 
         JBAumentar.setText("➕ Aumentar");
+        JBAumentar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBAumentarActionPerformed(evt);
+            }
+        });
 
         JBReduzir.setText("➖ Reduzir");
+        JBReduzir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBReduzirActionPerformed(evt);
+            }
+        });
 
         JBVoltar.setText("Voltar");
+        JBVoltar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBVoltarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -115,6 +200,65 @@ public class FrmReajustarpreco extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void JCBProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JCBProdutoActionPerformed
+        atualizarPrecoAtual();
+    }//GEN-LAST:event_JCBProdutoActionPerformed
+
+    private void JBAumentarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAumentarActionPerformed
+        try {
+            double percentual = Double.parseDouble(JTFPercentual.getText());
+            if (percentual <= 0) {
+                JOptionPane.showMessageDialog(this, "O percentual deve ser maior que zero.");
+                return;
+            }
+            
+            EstoqueService service = clienteRMI.getService();
+            boolean sucesso = service.reajustarPrecosPercentual(percentual);
+            
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, "Preços reajustados com sucesso!");
+                atualizarPrecoAtual();
+            } else {
+                JOptionPane.showMessageDialog(this, "Erro ao reajustar preços.");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Por favor, insira um percentual válido.");
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao reajustar preços: " + e.getMessage());
+        }
+    }//GEN-LAST:event_JBAumentarActionPerformed
+
+    private void JBReduzirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBReduzirActionPerformed
+        try {
+            double percentual = Double.parseDouble(JTFPercentual.getText());
+            if (percentual <= 0) {
+                JOptionPane.showMessageDialog(this, "O percentual deve ser maior que zero.");
+                return;
+            }
+            
+            EstoqueService service = clienteRMI.getService();
+            boolean sucesso = service.reajustarPrecosPercentual(-percentual);
+            
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, "Preços reajustados com sucesso!");
+                atualizarPrecoAtual();
+            } else {
+                JOptionPane.showMessageDialog(this, "Erro ao reajustar preços.");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Por favor, insira um percentual válido.");
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao reajustar preços: " + e.getMessage());
+        }
+    }//GEN-LAST:event_JBReduzirActionPerformed
+
+    private void JBVoltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBVoltarActionPerformed
+        if (janelaAnterior != null) {
+            janelaAnterior.setVisible(true);
+        }
+        this.dispose();
+    }//GEN-LAST:event_JBVoltarActionPerformed
 
     /**
      * @param args the command line arguments

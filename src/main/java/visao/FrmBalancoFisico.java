@@ -4,17 +4,81 @@
  */
 package visao;
 
+import cliente.ClienteRMI;
+import modelo.Produto;
+import service.EstoqueService;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.rmi.RemoteException;
+import java.util.List;
+
 /**
  *
  * @author eugus
  */
 public class FrmBalancoFisico extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
+    
     /**
      * Creates new form FrmBalancoFisico
      */
     public FrmBalancoFisico() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarBalanco();
+        }
+    }
+    
+    public FrmBalancoFisico(ClienteRMI cliente) {
+        initComponents();
+        this.clienteRMI = cliente;
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarBalanco();
+        }
+    }
+    
+    private void carregarBalanco() {
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Object[]> balanco = service.listarBalancoFisicoFinanceiro();
+            
+            DefaultTableModel modelo = (DefaultTableModel) JTBalanco.getModel();
+            modelo.setRowCount(0);
+            
+            double totalEstoque = 0.0;
+            for (Object[] row : balanco) {
+                String nome = (String) row[0];
+                String categoria = (String) row[1];
+                int quantidade = (Integer) row[2];
+                double preco = (Double) row[3];
+                double valorTotal = quantidade * preco;
+                totalEstoque += valorTotal;
+                
+                modelo.addRow(new Object[]{
+                    nome,
+                    categoria,
+                    quantidade,
+                    String.format("R$ %.2f", preco),
+                    String.format("R$ %.2f", valorTotal)
+                });
+            }
+            
+            JLTotal.setText("💰 Total do Estoque: R$ " + String.format("%.2f", totalEstoque));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar balanço: " + e.getMessage());
+        }
     }
 
     /**
@@ -146,33 +210,37 @@ public class FrmBalancoFisico extends javax.swing.JFrame {
 
     private void JBFiltrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFiltrarActionPerformed
         String texto = JTFBuscar.getText().trim().toLowerCase();
-        ProdutoDAO dao = new ProdutoDAO();
-        List<Produto> lista = dao.listarProdutoOrdenadoPorNome();
-        DefaultTableModel modelo = (DefaultTableModel) JTBalanco.getModel();
-        modelo.setRowCount(0);
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Produto> lista = service.listarProdutosOrdenadosPorNome();
+            DefaultTableModel modelo = (DefaultTableModel) JTBalanco.getModel();
+            modelo.setRowCount(0);
 
-        double totalEstoque = 0.0;
+            double totalEstoque = 0.0;
 
-        for (Produto p : lista) {
-            if (p.getNome().toLowerCase().contains(texto)) {
-                double valorTotal = p.getQuantidade() * p.getPreco();
-                totalEstoque += valorTotal;
+            for (Produto p : lista) {
+                if (p.getNome().toLowerCase().contains(texto)) {
+                    double valorTotal = p.getQuantidade() * p.getPreco();
+                    totalEstoque += valorTotal;
 
-                modelo.addRow(new Object[]{
-                    p.getNome(),
-                    p.getCategoria(),
-                    p.getQuantidade(),
-                    String.format("R$ %.2f", p.getPreco()),
-                    String.format("R$ %.2f", valorTotal)
-                });
+                    modelo.addRow(new Object[]{
+                        p.getNome(),
+                        p.getCategoria(),
+                        p.getQuantidade(),
+                        String.format("R$ %.2f", p.getPreco()),
+                        String.format("R$ %.2f", valorTotal)
+                    });
+                }
             }
-        }
 
-        JLTotal.setText("Total do estoque: R$ " + String.format("%.2f", totalEstoque));
+            JLTotal.setText("💰 Total do Estoque: R$ " + String.format("%.2f", totalEstoque));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao filtrar: " + e.getMessage());
+        }
     }//GEN-LAST:event_JBFiltrarActionPerformed
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
-        FrmRelatorio relatorio = new FrmRelatorio();
+        FrmRelatorio relatorio = new FrmRelatorio(clienteRMI, null);
         relatorio.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_JBFecharActionPerformed

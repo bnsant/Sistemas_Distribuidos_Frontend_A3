@@ -1,12 +1,33 @@
 
 package visao;
 
+import cliente.ClienteRMI;
+import javax.swing.JOptionPane;
 
 public class FrmTelaPrincipal extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
     
     public FrmTelaPrincipal() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.\nVerifique se o servidor está rodando.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public FrmTelaPrincipal(ClienteRMI cliente) {
+        initComponents();
+        this.clienteRMI = cliente;
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.\nVerifique se o servidor está rodando.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     
@@ -34,8 +55,18 @@ public class FrmTelaPrincipal extends javax.swing.JFrame {
         });
 
         JBRelatorios.setText("Relatorios");
+        JBRelatorios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBRelatoriosActionPerformed(evt);
+            }
+        });
 
         JBCategorias.setText("Categorias");
+        JBCategorias.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBCategoriasActionPerformed(evt);
+            }
+        });
 
         JBMovimentacao.setText("Movimentação de estoque");
         JBMovimentacao.addActionListener(new java.awt.event.ActionListener() {
@@ -98,16 +129,33 @@ public class FrmTelaPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed
-        // TODO add your handling code here:
+        if (clienteRMI != null) {
+            clienteRMI.desconectar();
+        }
+        System.exit(0);
     }//GEN-LAST:event_JBSairActionPerformed
 
     private void JBMovimentacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBMovimentacaoActionPerformed
-        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(this, "Funcionalidade de movimentação ainda não implementada.");
     }//GEN-LAST:event_JBMovimentacaoActionPerformed
 
     private void JBProdutos1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBProdutos1ActionPerformed
-        // TODO add your handling code here:
+        FrmListadeProduto listaProdutos = new FrmListadeProduto(clienteRMI, this);
+        listaProdutos.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_JBProdutos1ActionPerformed
+
+    private void JBRelatoriosActionPerformed(java.awt.event.ActionEvent evt) {
+        FrmRelatorio relatorio = new FrmRelatorio(clienteRMI, this);
+        relatorio.setVisible(true);
+        this.setVisible(false);
+    }
+
+    private void JBCategoriasActionPerformed(java.awt.event.ActionEvent evt) {
+        FrmListadeCategoria listaCategorias = new FrmListadeCategoria(clienteRMI, this);
+        listaCategorias.setVisible(true);
+        this.setVisible(false);
+    }
 
     /**
      * @param args the command line arguments

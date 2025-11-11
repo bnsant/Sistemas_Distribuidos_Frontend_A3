@@ -4,17 +4,71 @@
  */
 package visao;
 
+import cliente.ClienteRMI;
+import modelo.Produto;
+import service.EstoqueService;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.rmi.RemoteException;
+import java.util.List;
+
 /**
  *
  * @author eugus
  */
 public class FrmListaDePreco extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
+    
     /**
      * Creates new form FrmListaDePreco
      */
     public FrmListaDePreco() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarTabela();
+        }
+    }
+    
+    public FrmListaDePreco(ClienteRMI cliente) {
+        initComponents();
+        this.clienteRMI = cliente;
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarTabela();
+        }
+    }
+    
+    public void carregarTabela() {
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Produto> produtos = service.listarProdutosOrdenadosPorNome();
+            
+            DefaultTableModel modelo = (DefaultTableModel) JTListaDePreco.getModel();
+            modelo.setRowCount(0);
+            
+            for (Produto p : produtos) {
+                modelo.addRow(new Object[]{
+                    p.getId(),
+                    p.getNome(),
+                    p.getUnidade(),
+                    p.getCategoria(),
+                    String.format("R$ %.2f", p.getPreco())
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar lista de preços: " + e.getMessage());
+        }
     }
 
     /**
@@ -118,16 +172,20 @@ public class FrmListaDePreco extends javax.swing.JFrame {
 
         int idProduto = Integer.parseInt(JTListaDePreco.getValueAt(linhaSelecionada, 0).toString());
 
-        ProdutoDAO dao = new ProdutoDAO();
-        Produto produto = dao.ProcurarProdutoID(idProduto);
+        try {
+            EstoqueService service = clienteRMI.getService();
+            Produto produto = service.buscarProdutoPorId(idProduto);
 
-        FrmCadastrodeProduto editarProduto = new FrmCadastrodeProduto(this, produto);
-        editarProduto.setVisible(true);
-        this.setVisible(false);
+            FrmCadastrodeProduto editarProduto = new FrmCadastrodeProduto(clienteRMI, this, produto);
+            editarProduto.setVisible(true);
+            this.setVisible(false);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao buscar produto: " + e.getMessage());
+        }
     }//GEN-LAST:event_JBEditarActionPerformed
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
-        FrmRelatorio relatorio = new FrmRelatorio();
+        FrmRelatorio relatorio = new FrmRelatorio(clienteRMI, null);
         relatorio.setVisible(true);
         dispose();
     }//GEN-LAST:event_JBFecharActionPerformed

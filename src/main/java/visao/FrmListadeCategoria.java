@@ -4,17 +4,72 @@
  */
 package visao;
 
+import cliente.ClienteRMI;
+import modelo.Categoria;
+import service.EstoqueService;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.rmi.RemoteException;
+import java.util.List;
+
 /**
  *
  * @author eugus
  */
 public class FrmListadeCategoria extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
+    private javax.swing.JFrame janelaAnterior;
+    
     /**
      * Creates new form FrmListadeCategoria
      */
     public FrmListadeCategoria() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarTabela();
+        }
+    }
+    
+    public FrmListadeCategoria(ClienteRMI cliente, javax.swing.JFrame anterior) {
+        initComponents();
+        this.clienteRMI = cliente;
+        this.janelaAnterior = anterior;
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarTabela();
+        }
+    }
+    
+    public void carregarTabela() {
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Categoria> categorias = service.listarCategorias();
+            
+            DefaultTableModel modelo = (DefaultTableModel) JTListaCategoria.getModel();
+            modelo.setRowCount(0);
+            
+            for (Categoria c : categorias) {
+                modelo.addRow(new Object[]{
+                    c.getId(),
+                    c.getNomeCategoria(),
+                    c.getTamanho(),
+                    c.getEmbalagem()
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage());
+        }
     }
 
     /**
@@ -178,13 +233,13 @@ public class FrmListadeCategoria extends javax.swing.JFrame {
         int idCategoria = (int) JTListaCategoria.getValueAt(linhaSelecionada, 0); // ID na coluna 0
 
         try {
-            CategoriaDAO dao = new CategoriaDAO();
-            dao.excluir(idCategoria);
+            EstoqueService service = clienteRMI.getService();
+            service.excluirCategoria(idCategoria);
 
             JOptionPane.showMessageDialog(this, "Categoria excluída com sucesso!");
             carregarTabela();
 
-        } catch (SQLException e) {
+        } catch (RemoteException e) {
             JOptionPane.showMessageDialog(this, "Erro ao excluir categoria: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_JBExcluirActionPerformed

@@ -4,17 +4,42 @@
  */
 package visao;
 
+import cliente.ClienteRMI;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author roger
  */
 public class FrmRelatorio extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
+    private javax.swing.JFrame janelaAnterior;
+    
     /**
      * Creates new form FrmRelatorio
      */
     public FrmRelatorio() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public FrmRelatorio(ClienteRMI cliente, javax.swing.JFrame anterior) {
+        initComponents();
+        this.clienteRMI = cliente;
+        this.janelaAnterior = anterior;
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -67,6 +92,11 @@ public class FrmRelatorio extends javax.swing.JFrame {
         });
 
         JBFechar.setText("Fechar");
+        JBFechar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBFecharActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -111,20 +141,33 @@ public class FrmRelatorio extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBListadePrecoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBListadePrecoActionPerformed
-        // TODO add your handling code here:
+        FrmListaDePreco listaPreco = new FrmListaDePreco(clienteRMI);
+        listaPreco.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_JBListadePrecoActionPerformed
 
     private void JBBalançoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBBalançoActionPerformed
-        // TODO add your handling code here:
+        FrmBalancoFisico balanco = new FrmBalancoFisico(clienteRMI);
+        balanco.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_JBBalançoActionPerformed
 
     private void JBProdutosAbaixoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBProdutosAbaixoActionPerformed
-        // TODO add your handling code here:
+        // TODO: Implementar tela de produtos abaixo do mínimo se necessário
+        JOptionPane.showMessageDialog(this, "Funcionalidade ainda não implementada.");
     }//GEN-LAST:event_JBProdutosAbaixoActionPerformed
 
     private void JBQuantidadeProdutoCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBQuantidadeProdutoCategoriaActionPerformed
-        // TODO add your handling code here:
+        // TODO: Implementar tela de quantidade por categoria se necessário
+        JOptionPane.showMessageDialog(this, "Funcionalidade ainda não implementada.");
     }//GEN-LAST:event_JBQuantidadeProdutoCategoriaActionPerformed
+    
+    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
+        if (janelaAnterior != null) {
+            janelaAnterior.setVisible(true);
+        }
+        this.dispose();
+    }//GEN-LAST:event_JBFecharActionPerformed
 
     /**
      * @param args the command line arguments

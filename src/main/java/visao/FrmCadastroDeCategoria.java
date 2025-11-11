@@ -4,17 +4,69 @@
  */
 package visao;
 
+import cliente.ClienteRMI;
+import modelo.Categoria;
+import service.EstoqueService;
+import javax.swing.JOptionPane;
+import java.rmi.RemoteException;
+
 /**
  *
  * @author eugus
  */
 public class FrmCadastroDeCategoria extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
+    private javax.swing.JFrame janelaAnterior;
+    private int idCategoria;
+    
     /**
      * Creates new form FrmCadastroDeCategoria
      */
     public FrmCadastroDeCategoria() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        idCategoria = 0;
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public FrmCadastroDeCategoria(javax.swing.JFrame anterior) {
+        initComponents();
+        clienteRMI = new ClienteRMI();
+        this.janelaAnterior = anterior;
+        idCategoria = 0;
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public FrmCadastroDeCategoria(javax.swing.JFrame anterior, Categoria categoria) {
+        initComponents();
+        clienteRMI = new ClienteRMI();
+        this.janelaAnterior = anterior;
+        this.idCategoria = categoria.getId();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            preencherCampos(categoria);
+        }
+    }
+    
+    private void preencherCampos(Categoria categoria) {
+        JTFNomeCategoria.setText(categoria.getNomeCategoria());
+        JCBTamanho.setSelectedItem(categoria.getTamanho());
+        JCBEmbalagem.setSelectedItem(categoria.getEmbalagem());
     }
 
     /**
@@ -164,26 +216,29 @@ public class FrmCadastroDeCategoria extends javax.swing.JFrame {
                 return;
             }
 
-            Categoria categoria = new Categoria(nome, tamanho, embalagem);
-            CategoriaDAO dao = new CategoriaDAO();
+            try {
+                EstoqueService service = clienteRMI.getService();
+                Categoria categoria;
 
-            if (idCategoria == 0) {
-                dao.salvar(categoria);
-                JOptionPane.showMessageDialog(this, "Categoria salva com sucesso!");
-            } else {
-                categoria.setId(idCategoria);
-                dao.atualizar(categoria);
-                JOptionPane.showMessageDialog(this, "Categoria atualizada com sucesso!");
+                if (idCategoria == 0) {
+                    categoria = new Categoria(nome, tamanho, embalagem);
+                    service.criarCategoria(categoria);
+                    JOptionPane.showMessageDialog(this, "Categoria salva com sucesso!");
+                } else {
+                    categoria = new Categoria(idCategoria, nome, tamanho, embalagem);
+                    service.atualizarCategoria(categoria);
+                    JOptionPane.showMessageDialog(this, "Categoria atualizada com sucesso!");
+                }
+
+                if (janelaAnterior instanceof FrmListadeCategoria) {
+                    ((FrmListadeCategoria) janelaAnterior).carregarTabela();
+                    janelaAnterior.setVisible(true);
+                }
+
+                this.dispose();
+            } catch (RemoteException e) {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar categoria: " + e.getMessage());
             }
-
-            JOptionPane.showMessageDialog(this, "Categoria salva com sucesso!");
-
-            if (janelaAnterior instanceof FrmListadeCategoria) {
-                ((FrmListadeCategoria) janelaAnterior).carregarTabela();
-                janelaAnterior.setVisible(true);
-            }
-
-            this.dispose();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao salvar: " + e.getMessage());

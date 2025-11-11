@@ -4,17 +4,89 @@
  */
 package visao;
 
+import cliente.ClienteRMI;
+import modelo.Produto;
+import modelo.Categoria;
+import service.EstoqueService;
+import javax.swing.JOptionPane;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  *
  * @author eugus
  */
 public class FrmCadastrodeProduto extends javax.swing.JFrame {
 
+    private ClienteRMI clienteRMI;
+    private javax.swing.JFrame telaAnterior;
+    private Produto produtoEmEdicao;
+    
     /**
      * Creates new form FrmCadastrodeProduto
      */
     public FrmCadastrodeProduto() {
         initComponents();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarCategorias();
+        }
+    }
+    
+    public FrmCadastrodeProduto(ClienteRMI cliente, javax.swing.JFrame anterior, Produto produto) {
+        initComponents();
+        this.clienteRMI = cliente;
+        this.telaAnterior = anterior;
+        this.produtoEmEdicao = produto;
+        
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarCategorias();
+            if (produto != null) {
+                preencherCampos(produto);
+            }
+        }
+    }
+    
+    private void carregarCategorias() {
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Categoria> categorias = service.listarCategorias();
+            List<String> nomesCategorias = new ArrayList<>();
+            for (Categoria cat : categorias) {
+                nomesCategorias.add(cat.getNomeCategoria());
+            }
+            if (nomesCategorias.isEmpty()) {
+                nomesCategorias.add("Bebidas");
+                nomesCategorias.add("Alimentos");
+                nomesCategorias.add("Higiene");
+                nomesCategorias.add("Limpeza");
+            }
+            JCBCategoria.setModel(new javax.swing.DefaultComboBoxModel<>(nomesCategorias.toArray(new String[0])));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage());
+            JCBCategoria.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Bebidas", "Alimentos", "Higiene", "Limpeza" }));
+        }
+    }
+    
+    private void preencherCampos(Produto produto) {
+        JTFNome.setText(produto.getNome());
+        JTFPreco.setText(String.valueOf(produto.getPreco()));
+        JTFQuantidade.setText(String.valueOf(produto.getQuantidade()));
+        JTFUnidade.setText(produto.getUnidade());
+        JTFMin.setText(String.valueOf(produto.getMin()));
+        JTFMax.setText(String.valueOf(produto.getMax()));
+        JCBCategoria.setSelectedItem(produto.getCategoria());
     }
 
     /**
@@ -210,26 +282,24 @@ public class FrmCadastrodeProduto extends javax.swing.JFrame {
             String unidade = JTFUnidade.getText();
             String categoria = JCBCategoria.getSelectedItem().toString();
 
-            ProdutoDAO dao = new ProdutoDAO();
-            boolean sucesso;
+            try {
+                EstoqueService service = clienteRMI.getService();
 
-            if (produtoEmEdicao == null) {
-                Produto novoProduto = new Produto(0, nome, unidade, preco, quantidade, min, max, categoria);
-                sucesso = dao.CadastrarProduto(novoProduto);
-            } else {
-                produtoEmEdicao.setNome(nome);
-                produtoEmEdicao.setUnidade(unidade);
-                produtoEmEdicao.setPreco(preco);
-                produtoEmEdicao.setQuantidade(quantidade);
-                produtoEmEdicao.setMin(min);
-                produtoEmEdicao.setMax(max);
-                produtoEmEdicao.setCategoria(categoria);
-                sucesso = dao.AtualizarProduto(produtoEmEdicao);
-            }
-
-            if (sucesso) {
-                JOptionPane.showMessageDialog(this,
-                    produtoEmEdicao == null ? "Produto cadastrado com sucesso!" : "Produto atualizado com sucesso!");
+                if (produtoEmEdicao == null) {
+                    Produto novoProduto = new Produto(0, nome, unidade, preco, quantidade, min, max, categoria);
+                    service.criarProduto(novoProduto);
+                    JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!");
+                } else {
+                    produtoEmEdicao.setNome(nome);
+                    produtoEmEdicao.setUnidade(unidade);
+                    produtoEmEdicao.setPreco(preco);
+                    produtoEmEdicao.setQuantidade(quantidade);
+                    produtoEmEdicao.setMin(min);
+                    produtoEmEdicao.setMax(max);
+                    produtoEmEdicao.setCategoria(categoria);
+                    service.atualizarProduto(produtoEmEdicao);
+                    JOptionPane.showMessageDialog(this, "Produto atualizado com sucesso!");
+                }
 
                 if (telaAnterior instanceof FrmListaDePreco precoTela) {
                     precoTela.carregarTabela();
@@ -239,9 +309,9 @@ public class FrmCadastrodeProduto extends javax.swing.JFrame {
                     produtoTela.setVisible(true);
                 }
                 this.dispose();
-            } else {
+            } catch (RemoteException e) {
                 JOptionPane.showMessageDialog(this,
-                    "Erro ao cadastrar produto.",
+                    "Erro ao salvar produto: " + e.getMessage(),
                     "Erro",
                     JOptionPane.ERROR_MESSAGE);
             }
@@ -254,6 +324,9 @@ public class FrmCadastrodeProduto extends javax.swing.JFrame {
     }//GEN-LAST:event_JBSalvarActionPerformed
 
     private void JBCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCancelarActionPerformed
+        if (telaAnterior != null) {
+            telaAnterior.setVisible(true);
+        }
         this.dispose();
     }//GEN-LAST:event_JBCancelarActionPerformed
 
