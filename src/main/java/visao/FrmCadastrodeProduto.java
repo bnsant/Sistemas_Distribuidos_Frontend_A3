@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -314,6 +316,8 @@ public class FrmCadastrodeProduto extends javax.swing.JFrame {
                     "Erro ao salvar produto: " + e.getMessage(),
                     "Erro",
                     JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                Logger.getLogger(FrmCadastrodeProduto.class.getName()).log(Level.SEVERE, null, ex);
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this,

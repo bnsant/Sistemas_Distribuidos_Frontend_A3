@@ -11,6 +11,8 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -241,6 +243,8 @@ public class FrmListadeCategoria extends javax.swing.JFrame {
 
         } catch (RemoteException e) {
             JOptionPane.showMessageDialog(this, "Erro ao excluir categoria: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            Logger.getLogger(FrmListadeCategoria.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_JBExcluirActionPerformed
 
