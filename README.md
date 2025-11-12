@@ -11,6 +11,8 @@ Professor: Osmar de Oliveira Braz Júnior
 Este repositório contém o **frontend** do Sistema de Controle de Estoque distribuído, desenvolvido em **Java** com uso de **RMI (Remote Method Invocation)** para comunicação com o servidor.  
 O cliente é responsável por consumir os serviços do backend, permitindo a interação do usuário com o sistema por meio de interfaces que realizam operações no estoque.
 
+🔗 **Repositório do Backend:** [Sistemas_Distribuidos_Backend_A3](https://github.com/bnsant/Sistemas_Distribuidos_Backend_A3)
+
 ---
 
 ## Tecnologias Utilizadas
