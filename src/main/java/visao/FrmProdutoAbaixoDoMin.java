@@ -46,7 +46,7 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
@@ -90,8 +90,7 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
             }
         });
 
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel2.setText("Produtos Abaixo do Mínimo/Máximo");
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel2.setText("Produtos Abaixo do Mínimo/Máximo");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -137,7 +136,7 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
     private void JBBuscarActionPerformed(java.awt.event.ActionEvent evt) {
         carregarProdutosAbaixoDoMin();
@@ -172,7 +171,6 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton JBBuscar;
     private javax.swing.JToggleButton JBFechar;
     private javax.swing.JComboBox<String> JCBFiltro;
@@ -180,5 +178,5 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    // End of variables declaration//GEN-END:variables
+
 }

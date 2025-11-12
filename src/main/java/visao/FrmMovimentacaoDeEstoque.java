@@ -81,7 +81,7 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
 
         jSeparator1 = new javax.swing.JSeparator();
@@ -166,8 +166,7 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
 
         JRBSaida.setText("Saída");
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Movimentação de Estoque");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel1.setText("Movimentação de Estoque");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -262,9 +261,9 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
-    private void JBRegistrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRegistrarActionPerformed
+    private void JBRegistrarActionPerformed(java.awt.event.ActionEvent evt) {
         if (estoqueService == null) {
             JOptionPane.showMessageDialog(this, "Servidor não conectado!");
             return;
@@ -324,22 +323,22 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao registrar movimentação: " + e.getMessage());
         }
-    }//GEN-LAST:event_JBRegistrarActionPerformed
+    }
 
-    private void JBLimparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBLimparActionPerformed
+    private void JBLimparActionPerformed(java.awt.event.ActionEvent evt) {
         JCBProduto.setSelectedIndex(-1);
         JTFQuantidade.setText("");
         JTFData.setText("");
         JRBEntrada.setSelected(false);
         JRBSaida.setSelected(false);
-    }//GEN-LAST:event_JBLimparActionPerformed
+    }
 
-    private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed
+    private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {
         this.dispose();
-    }//GEN-LAST:event_JBSairActionPerformed
+    }
 
-    private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jScrollPane1AncestorAdded
-    }//GEN-LAST:event_jScrollPane1AncestorAdded
+    private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {
+    }
 
     public static void main(String args[]) {
         try {
@@ -366,7 +365,6 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBLimpar;
     private javax.swing.JButton JBRegistrar;
     private javax.swing.JButton JBSair;
@@ -385,5 +383,5 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    // End of variables declaration//GEN-END:variables
+
 }

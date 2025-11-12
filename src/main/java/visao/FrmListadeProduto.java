@@ -294,6 +294,15 @@ public class FrmListadeProduto extends javax.swing.JFrame {
     }//GEN-LAST:event_JCBCategoria1ActionPerformed
 
     private void JBFiltrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFiltrarActionPerformed
+    }
+
+    private void JCBCategoriaActionPerformed(java.awt.event.ActionEvent evt) {
+    }
+
+    private void JCBCategoria1ActionPerformed(java.awt.event.ActionEvent evt) {
+    }
+
+    private void JBFiltrarActionPerformed(java.awt.event.ActionEvent evt) {
         String nomeBuscado = JTFBuscar.getText().trim();
         String categoriaSelecionada = JCBCategoria1.getSelectedItem() != null ? 
             JCBCategoria1.getSelectedItem().toString() : "Todas";
@@ -383,7 +392,7 @@ public class FrmListadeProduto extends javax.swing.JFrame {
     }//GEN-LAST:event_JBVoltarLPActionPerformed
 
     private void JBReajustarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBReajustarActionPerformed
-        FrmReajustarpreco reajuste = new FrmReajustarpreco(clienteRMI, this);
+        FrmReajustarPreco reajuste = new FrmReajustarPreco(clienteRMI, this);
         reajuste.setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_JBReajustarActionPerformed
@@ -392,7 +401,7 @@ public class FrmListadeProduto extends javax.swing.JFrame {
         FrmCadastrodeProduto novoProduto = new FrmCadastrodeProduto(clienteRMI, this, null);
         novoProduto.setVisible(true);
         this.setVisible(false);
-    }
+    }//GEN-LAST:event_JBNovoProdutoActionPerformed
 
     /**
      * @param args the command line arguments

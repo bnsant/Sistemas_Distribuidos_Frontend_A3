@@ -44,7 +44,7 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
@@ -55,8 +55,7 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Quantidade de produto");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel1.setText("Quantidade de produto");
 
         JTQuantidadeProdutoCategoria.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -119,7 +118,7 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
     private void JBAtualizarActionPerformed(java.awt.event.ActionEvent evt) {
         if (estoqueService == null) {
@@ -208,11 +207,10 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton JBAtualizar;
     private javax.swing.JToggleButton JBFechar;
     private javax.swing.JTable JTQuantidadeProdutoCategoria;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    // End of variables declaration//GEN-END:variables
+
 }

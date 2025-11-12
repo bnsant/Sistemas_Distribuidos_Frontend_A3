@@ -52,7 +52,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
@@ -64,8 +64,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Relatórios");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel1.setText("Relatórios");
 
         JBListadePreco.setText("Lista de preços");
         JBListadePreco.addActionListener(new java.awt.event.ActionListener() {
@@ -142,9 +141,9 @@ public class FrmRelatorio extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
-    private void JBListadePrecoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBListadePrecoActionPerformed
+    private void JBListadePrecoActionPerformed(java.awt.event.ActionEvent evt) {
         if (estoqueService != null) {
             try {
                 FrmListaDePreco listaPreco = new FrmListaDePreco(estoqueService);
@@ -160,9 +159,9 @@ public class FrmRelatorio extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Servidor não conectado!");
         }
-    }//GEN-LAST:event_JBListadePrecoActionPerformed
+    }
 
-    private void JBBalançoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBBalançoActionPerformed
+    private void JBBalançoActionPerformed(java.awt.event.ActionEvent evt) {
         if (estoqueService != null) {
             try {
                 FrmBalancoFisico balanco = new FrmBalancoFisico(estoqueService);
@@ -178,9 +177,9 @@ public class FrmRelatorio extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Servidor não conectado!");
         }
-    }//GEN-LAST:event_JBBalançoActionPerformed
+    }
 
-    private void JBProdutosAbaixoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBProdutosAbaixoActionPerformed
+    private void JBProdutosAbaixoActionPerformed(java.awt.event.ActionEvent evt) {
         if (estoqueService != null) {
             try {
                 List<Produto> produtosAbaixo = estoqueService.listarProdutosAbaixoMinimo();
@@ -200,9 +199,9 @@ public class FrmRelatorio extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Servidor não conectado!");
         }
-    }//GEN-LAST:event_JBProdutosAbaixoActionPerformed
+    }
 
-    private void JBQuantidadeProdutoCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBQuantidadeProdutoCategoriaActionPerformed
+    private void JBQuantidadeProdutoCategoriaActionPerformed(java.awt.event.ActionEvent evt) {
         if (estoqueService != null) {
             try {
                 List<String[]> quantidadePorCategoria = estoqueService.listarQuantidadePorCategoria();
@@ -224,14 +223,14 @@ public class FrmRelatorio extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Servidor não conectado!");
         }
-    }//GEN-LAST:event_JBQuantidadeProdutoCategoriaActionPerformed
+    }
     
-    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
+    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {
         if (janelaAnterior != null) {
             janelaAnterior.setVisible(true);
         }
         this.dispose();
-    }//GEN-LAST:event_JBFecharActionPerformed
+    }
 
     public static void main(String args[]) {
         try {
@@ -258,12 +257,11 @@ public class FrmRelatorio extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton JBBalanço;
     private javax.swing.JToggleButton JBFechar;
     private javax.swing.JToggleButton JBListadePreco;
     private javax.swing.JToggleButton JBProdutosAbaixo;
     private javax.swing.JToggleButton JBQuantidadeProdutoCategoria;
     private javax.swing.JLabel jLabel1;
-    // End of variables declaration//GEN-END:variables
+
 }
