@@ -1,118 +1,78 @@
+
 package visao;
 
-import cliente.ClienteRMI;
-import service.EstoqueService;
-import javax.swing.JOptionPane;
-import java.util.List;
-import modelo.Produto;
-import modelo.Categoria;
+        import cliente.ClienteRMI;
+        import interfaces.EstoqueService;
+        import javax.swing.JOptionPane;
 
-/**
- * Tela principal de relatórios do sistema de controle de estoque.
- * Fornece acesso a diferentes tipos de relatórios: lista de preços,
- * balanço físico-financeiro, produtos abaixo do mínimo e quantidade por categoria.
- * 
- * @author Sistema de Controle de Estoque
- * @version 1.0
- */
 public class FrmRelatorio extends javax.swing.JFrame {
-
-    /**
-     * Serviço remoto de estoque para comunicação com o servidor RMI.
-     */
-    private EstoqueService estoqueService;
     
-    /**
-     * Cliente RMI para gerenciar a conexão com o servidor.
-     */
-    private ClienteRMI clienteRMI;
-    
-    /**
-     * Referência à janela anterior para retorno.
-     */
-    private javax.swing.JFrame janelaAnterior;
-    
-    /**
-     * Construtor padrão que inicializa apenas os componentes da interface.
-     */
+private ClienteRMI clienteRMI;
+private EstoqueService estoqueService;
+   
     public FrmRelatorio() {
         initComponents();
+        conectarServidorRMI();
     }
     
-    /**
-     * Construtor que recebe cliente RMI e janela anterior.
-     * 
-     * @param cliente Cliente RMI para comunicação com o servidor
-     * @param anterior Janela anterior para retorno
-     */
-    public FrmRelatorio(ClienteRMI cliente, javax.swing.JFrame anterior) {
+    public FrmRelatorio(ClienteRMI clienteRMI) {
         initComponents();
-        this.clienteRMI = cliente;
-        this.janelaAnterior = anterior;
-        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
-            JOptionPane.showMessageDialog(this, 
-                "Não foi possível conectar ao servidor RMI.",
-                "Erro de Conexão", 
-                JOptionPane.ERROR_MESSAGE);
-        }
+        this.clienteRMI = clienteRMI;
+        conectarServidorRMI();
     }
-    
-    /**
-     * Construtor que recebe o serviço de estoque diretamente.
-     * 
-     * @param estoqueService Serviço remoto de estoque
-     */
-    public FrmRelatorio(EstoqueService estoqueService) {
-        this.estoqueService = estoqueService;
-        initComponents();
-        carregarRelatorio();
-    }
-    
-    /**
-     * Carrega dados iniciais do relatório.
-     */
-    private void carregarRelatorio() {
-        if (estoqueService == null) {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-            return;
-        }
-        
+
+    private void conectarServidorRMI() {
         try {
-            List<Produto> produtos = estoqueService.listarProdutos();
-            List<Categoria> categorias = estoqueService.listarCategorias();
-            int totalProdutos = produtos.size();
-            int totalCategorias = categorias.size();
+            if (this.clienteRMI == null) {
+                this.clienteRMI = new ClienteRMI();
+            }
+            if (this.clienteRMI.conectar()) {
+                this.estoqueService = this.clienteRMI.getService();
+            } else {
+                JOptionPane.showMessageDialog(this, "Não foi possível conectar ao servidor RMI.");
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar relatório: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao conectar ao servidor: " + e.getMessage());
         }
     }
 
+    
     @SuppressWarnings("unchecked")
-
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        JBListadePreco = new javax.swing.JToggleButton();
-        JBBalanço = new javax.swing.JToggleButton();
-        JBProdutosAbaixo = new javax.swing.JToggleButton();
-        JBQuantidadeProdutoCategoria = new javax.swing.JToggleButton();
+        jSeparator1 = new javax.swing.JSeparator();
         JBFechar = new javax.swing.JToggleButton();
+        JBListadePreco = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        JBProdutosAbaixo = new javax.swing.JButton();
+        JBQuantidadeProdutoCategoria = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel1.setText("Relatórios");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel1.setText("Relatórios");
 
-        JBListadePreco.setText("Lista de preços");
+        JBFechar.setBackground(new java.awt.Color(220, 53, 69));
+        JBFechar.setText("Fechar");
+        JBFechar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBFecharActionPerformed(evt);
+            }
+        });
+
+        JBListadePreco.setText("Lista de Preços");
         JBListadePreco.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JBListadePrecoActionPerformed(evt);
             }
         });
 
-        JBBalanço.setText("Balanço Físico-Financeiro");
-        JBBalanço.addActionListener(new java.awt.event.ActionListener() {
+        jButton1.setText("Balanço Físico-Financeiro");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JBBalançoActionPerformed(evt);
+                jButton1ActionPerformed(evt);
             }
         });
 
@@ -130,159 +90,110 @@ public class FrmRelatorio extends javax.swing.JFrame {
             }
         });
 
-        JBFechar.setText("Fechar");
-        JBFechar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JBFecharActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(141, 141, 141)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(JBBalanço, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(JBListadePreco, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(JBProdutosAbaixo, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
-                            .addComponent(JBQuantidadeProdutoCategoria, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)))
+                        .addGap(223, 223, 223)
+                        .addComponent(JBFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(222, 222, 222)
-                        .addComponent(JBFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(214, 214, 214)
-                        .addComponent(jLabel1)))
-                .addContainerGap(147, Short.MAX_VALUE))
+                        .addGap(151, 151, 151)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(JBQuantidadeProdutoCategoria)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel1)
+                                    .addGap(68, 68, 68))
+                                .addComponent(JBListadePreco, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(JBProdutosAbaixo, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)))))
+                .addContainerGap(135, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(27, 27, 27)
+                .addGap(25, 25, 25)
                 .addComponent(jLabel1)
-                .addGap(58, 58, 58)
-                .addComponent(JBListadePreco)
-                .addGap(18, 18, 18)
-                .addComponent(JBBalanço)
-                .addGap(18, 18, 18)
-                .addComponent(JBProdutosAbaixo)
-                .addGap(18, 18, 18)
-                .addComponent(JBQuantidadeProdutoCategoria)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(39, 39, 39)
+                .addComponent(JBListadePreco)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(JBProdutosAbaixo)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(JBQuantidadeProdutoCategoria)
+                .addGap(62, 62, 62)
                 .addComponent(JBFechar)
-                .addContainerGap(141, Short.MAX_VALUE))
+                .addContainerGap(106, Short.MAX_VALUE))
         );
 
         pack();
-    }
+    }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * Trata o evento de clique no botão Lista de Preços.
-     * Abre a tela de lista de preços dos produtos.
-     * 
-     * @param evt Evento de ação do botão
-     */
-    private void JBListadePrecoActionPerformed(java.awt.event.ActionEvent evt) {
-        if (clienteRMI != null) {
-            FrmListaDePreco listaPreco = new FrmListaDePreco(clienteRMI);
-            listaPreco.setVisible(true);
-            this.setVisible(false);
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-        }
-    }
-
-    /**
-     * Trata o evento de clique no botão Balanço Físico-Financeiro.
-     * Abre a tela de balanço físico e financeiro do estoque.
-     * 
-     * @param evt Evento de ação do botão
-     */
-    private void JBBalançoActionPerformed(java.awt.event.ActionEvent evt) {
-        if (clienteRMI != null) {
-            FrmBalancoFisico balanco = new FrmBalancoFisico(clienteRMI);
-            balanco.setVisible(true);
-            this.setVisible(false);
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-        }
-    }
-
-    /**
-     * Trata o evento de clique no botão Produtos Abaixo do Mínimo.
-     * Exibe uma mensagem com a lista de produtos que estão com estoque abaixo do mínimo.
-     * 
-     * @param evt Evento de ação do botão
-     */
-    private void JBProdutosAbaixoActionPerformed(java.awt.event.ActionEvent evt) {
-        if (estoqueService != null) {
-            try {
-                List<Produto> produtosAbaixo = estoqueService.listarProdutosAbaixoMinimo();
-                StringBuilder mensagem = new StringBuilder();
-                mensagem.append("Produtos abaixo do mínimo:\n\n");
-                if (produtosAbaixo.isEmpty()) {
-                    mensagem.append("Nenhum produto abaixo do mínimo.");
-                } else {
-                    for (Produto p : produtosAbaixo) {
-                        mensagem.append("- ").append(p.getNome()).append(" (Estoque: ").append(p.getQuantidade()).append(", Mínimo: ").append(p.getMin()).append(")\n");
-                    }
-                }
-                JOptionPane.showMessageDialog(this, mensagem.toString(), "Produtos Abaixo do Mínimo", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Erro ao buscar produtos: " + e.getMessage());
+    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
+        try {
+            if (this.clienteRMI != null) {
+                this.clienteRMI.desconectar();
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
+        } catch (Exception e) {
+            
+        } finally {
+            dispose();
         }
-    }
+    }//GEN-LAST:event_JBFecharActionPerformed
+
+    private void JBListadePrecoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBListadePrecoActionPerformed
+        try {
+            FrmListaDePreco tela = new FrmListaDePreco(this.clienteRMI);
+            tela.setVisible(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir Lista de Preço: " + e.getMessage());
+        }
+    }//GEN-LAST:event_JBListadePrecoActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        FrmBalancoFisico objeto = new FrmBalancoFisico();
+        objeto.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void JBProdutosAbaixoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBProdutosAbaixoActionPerformed
+        try {
+            FrmProdutoAbaixoDoMin tela = new FrmProdutoAbaixoDoMin(this.clienteRMI);
+            tela.setVisible(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir Produtos Abaixo do Mínimo: " + e.getMessage());
+        }
+    }//GEN-LAST:event_JBProdutosAbaixoActionPerformed
+
+    private void JBQuantidadeProdutoCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBQuantidadeProdutoCategoriaActionPerformed
+        try {
+            FrmQuantidadeDeProduto tela = new FrmQuantidadeDeProduto(this.clienteRMI);
+            tela.setVisible(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir Quantidade por Categoria: " + e.getMessage());
+        }try {
+            FrmQuantidadeDeProduto tela = new FrmQuantidadeDeProduto(this.clienteRMI);
+            tela.setVisible(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir Quantidade por Categoria: " + e.getMessage());
+        }
+    }//GEN-LAST:event_JBQuantidadeProdutoCategoriaActionPerformed
 
     /**
-     * Trata o evento de clique no botão Quantidade de Produtos por Categoria.
-     * Exibe uma mensagem com a quantidade de produtos agrupados por categoria.
-     * 
-     * @param evt Evento de ação do botão
+     * @param args the command line arguments
      */
-    private void JBQuantidadeProdutoCategoriaActionPerformed(java.awt.event.ActionEvent evt) {
-        if (estoqueService != null) {
-            try {
-                List<String[]> quantidadePorCategoria = estoqueService.listarQuantidadePorCategoria();
-                StringBuilder mensagem = new StringBuilder();
-                mensagem.append("Quantidade de Produtos por Categoria:\n\n");
-                if (quantidadePorCategoria.isEmpty()) {
-                    mensagem.append("Nenhuma categoria encontrada.");
-                } else {
-                    for (String[] item : quantidadePorCategoria) {
-                        if (item.length >= 2) {
-                            mensagem.append("- ").append(item[0]).append(": ").append(item[1]).append(" produtos\n");
-                        }
-                    }
-                }
-                JOptionPane.showMessageDialog(this, mensagem.toString(), "Quantidade por Categoria", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Erro ao buscar quantidade por categoria: " + e.getMessage());
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-        }
-    }
-    
-    /**
-     * Trata o evento de clique no botão Fechar.
-     * Retorna para a janela anterior e fecha a tela de relatórios.
-     * 
-     * @param evt Evento de ação do botão
-     */
-    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {
-        if (janelaAnterior != null) {
-            janelaAnterior.setVisible(true);
-        }
-        this.dispose();
-    }
-
     public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -299,7 +210,9 @@ public class FrmRelatorio extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(FrmRelatorio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
 
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new FrmRelatorio().setVisible(true);
@@ -307,11 +220,13 @@ public class FrmRelatorio extends javax.swing.JFrame {
         });
     }
 
-    private javax.swing.JToggleButton JBBalanço;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton JBFechar;
-    private javax.swing.JToggleButton JBListadePreco;
-    private javax.swing.JToggleButton JBProdutosAbaixo;
-    private javax.swing.JToggleButton JBQuantidadeProdutoCategoria;
+    private javax.swing.JButton JBListadePreco;
+    private javax.swing.JButton JBProdutosAbaixo;
+    private javax.swing.JButton JBQuantidadeProdutoCategoria;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-
+    private javax.swing.JSeparator jSeparator1;
+    // End of variables declaration//GEN-END:variables
 }

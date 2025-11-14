@@ -1,86 +1,65 @@
+
 package visao;
 
-import service.EstoqueService;
-import javax.swing.JOptionPane;
+import cliente.ClienteRMI;
+import interfaces.EstoqueService;
 import java.util.List;
-import modelo.Produto;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import modelo.Categoria;
+import modelo.Produto;
 
-/**
- * Tela para exibição da quantidade de produtos em estoque.
- * Mostra todos os produtos com suas respectivas quantidades.
- * 
- * @author Sistema de Controle de Estoque
- * @version 1.0
- */
+
+
 public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
-
-    /**
-     * Serviço remoto de estoque para comunicação com o servidor RMI.
-     */
+    
+    private ClienteRMI clienteRMI;
     private EstoqueService estoqueService;
+
     
-    /**
-     * Lista de produtos carregados do servidor.
-     */
-    private List<Produto> produtosLista;
-    
-    /**
-     * Construtor padrão que inicializa apenas os componentes da interface.
-     */
     public FrmQuantidadeDeProduto() {
         initComponents();
+        conectarServidorRMI();
+        atualizarTabela();
+
     }
     
-    /**
-     * Construtor que recebe o serviço de estoque e carrega os dados.
-     * 
-     * @param estoqueService Serviço remoto de estoque
-     */
-    public FrmQuantidadeDeProduto(EstoqueService estoqueService) {
-        this.estoqueService = estoqueService;
-        initComponents();
-        carregarProdutos();
-    }
-    
-    /**
-     * Carrega a lista de produtos do servidor e exibe na tabela.
-     */
-    private void carregarProdutos() {
-        if (estoqueService == null) {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-            return;
-        }
-        
+    private void conectarServidorRMI() {
         try {
-            produtosLista = estoqueService.listarProdutos();
-            DefaultTableModel modelo = (DefaultTableModel) JTQuantidadeProdutoCategoria.getModel();
-            modelo.setRowCount(0);
-            
-            for (Produto p : produtosLista) {
-                modelo.addRow(new Object[]{
-                    p.getNome(),
-                    p.getQuantidade()
-                });
+            if (clienteRMI == null)
+                clienteRMI = new ClienteRMI();
+
+            if (clienteRMI.conectar()) {
+                estoqueService = clienteRMI.getService();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Não foi possível conectar ao servidor RMI.");
             }
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao conectar: " + e.getMessage());
         }
     }
+    
 
+    
     @SuppressWarnings("unchecked")
-
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
         jScrollPane1 = new javax.swing.JScrollPane();
         JTQuantidadeProdutoCategoria = new javax.swing.JTable();
-        JBAtualizar = new javax.swing.JToggleButton();
-        JBFechar = new javax.swing.JToggleButton();
+        JBAtualizar = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JSeparator();
+        JBFechar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel1.setText("Quantidade de produto");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel1.setText("Quantidade de Produtos por Categoria");
 
         JTQuantidadeProdutoCategoria.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -90,7 +69,7 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
                 {null, null}
             },
             new String [] {
-                "Produto", "Quantidade"
+                "Categoria", "Quantidade"
             }
         ));
         jScrollPane1.setViewportView(JTQuantidadeProdutoCategoria);
@@ -102,6 +81,7 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
             }
         });
 
+        JBFechar.setBackground(new java.awt.Color(220, 53, 69));
         JBFechar.setText("Fechar");
         JBFechar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -113,101 +93,95 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(130, 130, 130)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(80, Short.MAX_VALUE)
+                .addContainerGap(78, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addGap(63, 63, 63))
+            .addComponent(jSeparator2)
+            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(42, 42, 42)
+                        .addGap(117, 117, 117)
                         .addComponent(JBAtualizar)
-                        .addGap(52, 52, 52)
-                        .addComponent(JBFechar)))
-                .addGap(88, 88, 88))
+                        .addGap(64, 64, 64)
+                        .addComponent(JBFechar))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(80, 80, 80)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
+                .addGap(17, 17, 17)
                 .addComponent(jLabel1)
-                .addGap(60, 60, 60)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(55, 55, 55)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(JBAtualizar)
                     .addComponent(JBFechar))
-                .addContainerGap(59, Short.MAX_VALUE))
+                .addContainerGap(48, Short.MAX_VALUE))
         );
 
         pack();
-    }
-
-    private void JBAtualizarActionPerformed(java.awt.event.ActionEvent evt) {
-        if (estoqueService == null) {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-            return;
-        }
-        
+    }// </editor-fold>//GEN-END:initComponents
+private void atualizarTabela() {
         try {
-            int linhaSelecionada = JTQuantidadeProdutoCategoria.getSelectedRow();
-            if (linhaSelecionada == -1) {
-                JOptionPane.showMessageDialog(this, "Selecione um produto.");
-                return;
-            }
-            
-            String nomeProduto = (String) JTQuantidadeProdutoCategoria.getValueAt(linhaSelecionada, 0);
-            Object quantidadeObj = JTQuantidadeProdutoCategoria.getValueAt(linhaSelecionada, 1);
-            
-            if (nomeProduto == null || quantidadeObj == null) {
-                JOptionPane.showMessageDialog(this, "Dados inválidos na tabela.");
-                return;
-            }
-            
-            String quantidadeTexto = quantidadeObj.toString().trim();
-            if (quantidadeTexto.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Informe a quantidade.");
-                return;
-            }
-            
-            int novaQuantidade = Integer.parseInt(quantidadeTexto);
-            
-            Produto produtoSelecionado = null;
-            for (Produto p : produtosLista) {
-                if (p.getNome().equals(nomeProduto)) {
-                    produtoSelecionado = p;
-                    break;
+            List<Categoria> categorias = estoqueService.listarCategorias();
+
+            DefaultTableModel model =
+                    (DefaultTableModel) JTQuantidadeProdutoCategoria.getModel();
+
+            model.setRowCount(0); // limpa tabela
+
+            for (Categoria cat : categorias) {
+
+                int total = 0;
+
+                List<Produto> produtos =
+                        estoqueService.listarProdutosPorCategoria(cat.getId());
+
+                for (Produto p : produtos) {
+                    total += p.getQuantidade();
                 }
+
+                model.addRow(new Object[]{
+                    cat.getNome(),
+                    total
+                });
             }
-            
-            if (produtoSelecionado == null) {
-                produtoSelecionado = estoqueService.buscarProdutoPorNome(nomeProduto);
-            }
-            
-            if (produtoSelecionado == null) {
-                JOptionPane.showMessageDialog(this, "Produto não encontrado.");
-                return;
-            }
-            
-            produtoSelecionado.setQuantidade(novaQuantidade);
-            estoqueService.atualizarProduto(produtoSelecionado);
-            
-            JOptionPane.showMessageDialog(this, "Quantidade atualizada com sucesso!");
-            carregarProdutos();
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Quantidade inválida. Digite um número inteiro.");
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao atualizar quantidade: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao carregar dados: " + e.getMessage());
         }
     }
-    
-    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {
-        this.dispose();
-    }
+    private void JBAtualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAtualizarActionPerformed
+        atualizarTabela();
+    }//GEN-LAST:event_JBAtualizarActionPerformed
 
+    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
+        if (janelaAnterior != null) {
+            janelaAnterior.setVisible(true);
+        }
+        dispose();
+    }//GEN-LAST:event_JBFecharActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
     public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -224,7 +198,9 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(FrmQuantidadeDeProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
 
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new FrmQuantidadeDeProduto().setVisible(true);
@@ -232,10 +208,13 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
         });
     }
 
-    private javax.swing.JToggleButton JBAtualizar;
-    private javax.swing.JToggleButton JBFechar;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton JBAtualizar;
+    private javax.swing.JButton JBFechar;
     private javax.swing.JTable JTQuantidadeProdutoCategoria;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    // End of variables declaration//GEN-END:variables
 }

@@ -1,85 +1,71 @@
+
 package visao;
 
 import cliente.ClienteRMI;
-import service.EstoqueService;
+import interfaces.EstoqueService;
 import javax.swing.JOptionPane;
-
-/**
- * Tela principal do sistema de controle de estoque.
- * Fornece acesso às funcionalidades principais: produtos, categorias,
- * movimentações e relatórios através de botões de navegação.
- * 
- * @author Sistema de Controle de Estoque
- * @version 1.0
- */
+ 
 public class FrmTelaPrincipal extends javax.swing.JFrame {
-
-    /**
-     * Serviço remoto de estoque para comunicação com o servidor RMI.
-     */
-    private EstoqueService estoqueService;
     
-    /**
-     * Cliente RMI para gerenciar a conexão com o servidor.
-     */
     private ClienteRMI clienteRMI;
+    private EstoqueService estoqueService;
+
+
     
-    /**
-     * Construtor padrão que inicializa a tela e cria uma nova conexão RMI.
-     */
     public FrmTelaPrincipal() {
         initComponents();
-        this.clienteRMI = new ClienteRMI();
         conectarServidorRMI();
     }
     
-    /**
-     * Construtor que recebe um cliente RMI já configurado.
-     * 
-     * @param clienteRMI Cliente RMI para comunicação com o servidor
-     */
     public FrmTelaPrincipal(ClienteRMI clienteRMI) {
-        initComponents();
+        initComponents();   
         this.clienteRMI = clienteRMI;
-        if (clienteRMI.estaConectado()) {
-            this.estoqueService = clienteRMI.getService();
-        } else {
-            conectarServidorRMI();
-        }
+        conectarServidorRMI();
+
     }
     
-    /**
-     * Estabelece conexão com o servidor RMI.
-     * Cria um novo cliente se necessário e obtém o serviço remoto.
-     */
     private void conectarServidorRMI() {
-        if (clienteRMI == null) {
-            clienteRMI = new ClienteRMI();
-        }
-        if (clienteRMI.conectar()) {
-            estoqueService = clienteRMI.getService();
-        } else {
-            estoqueService = null;
-            JOptionPane.showMessageDialog(this, "Não foi possível conectar ao servidor RMI. Verifique se o servidor está ativo.");
+        try {
+            if (this.clienteRMI == null) {
+                this.clienteRMI = new ClienteRMI();
+            }
+
+            if (this.clienteRMI.conectar()) {
+                this.estoqueService = this.clienteRMI.getService();
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Não foi possível conectar ao servidor RMI.");
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Erro ao conectar ao servidor RMI: " + e.getMessage());
         }
     }
 
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        JBRelatorios = new javax.swing.JButton();
         JBSair = new javax.swing.JButton();
-        JBRelatorios = new javax.swing.JToggleButton();
-        JBCategorias = new javax.swing.JToggleButton();
-        JBMovimentacao = new javax.swing.JToggleButton();
-        JBProdutos1 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        JBProdutos = new javax.swing.JButton();
+        JBCategorias = new javax.swing.JButton();
+        JBMovimentação = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Controle de estoque");
+        JBRelatorios.setText("Relatórios");
+        JBRelatorios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBRelatoriosActionPerformed(evt);
+            }
+        });
 
+        JBSair.setBackground(new java.awt.Color(220, 53, 69));
         JBSair.setText("Sair");
         JBSair.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -87,10 +73,13 @@ public class FrmTelaPrincipal extends javax.swing.JFrame {
             }
         });
 
-        JBRelatorios.setText("Relatorios");
-        JBRelatorios.addActionListener(new java.awt.event.ActionListener() {
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel1.setText("Controle de Estoque");
+
+        JBProdutos.setText("Produtos");
+        JBProdutos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JBRelatoriosActionPerformed(evt);
+                JBProdutosActionPerformed(evt);
             }
         });
 
@@ -101,17 +90,10 @@ public class FrmTelaPrincipal extends javax.swing.JFrame {
             }
         });
 
-        JBMovimentacao.setText("Movimentação de estoque");
-        JBMovimentacao.addActionListener(new java.awt.event.ActionListener() {
+        JBMovimentação.setText("Movimentação de Estoque");
+        JBMovimentação.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JBMovimentacaoActionPerformed(evt);
-            }
-        });
-
-        JBProdutos1.setText("Produtos");
-        JBProdutos1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JBProdutos1ActionPerformed(evt);
+                JBMovimentaçãoActionPerformed(evt);
             }
         });
 
@@ -120,129 +102,121 @@ public class FrmTelaPrincipal extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(128, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(JBMovimentacao, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(JBRelatorios)
-                                .addGap(18, 18, 18)
-                                .addComponent(JBCategorias))
-                            .addComponent(jLabel1))
-                        .addGap(124, 124, 124))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(51, 51, 51)
-                        .addComponent(JBProdutos1)
-                        .addContainerGap())))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(179, 179, 179)
-                .addComponent(JBSair)
-                .addGap(0, 0, Short.MAX_VALUE))
+                                .addGap(123, 123, 123)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(45, 45, 45)
+                                        .addComponent(JBSair, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(JBRelatorios)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(JBCategorias))
+                                    .addComponent(JBMovimentação, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(132, 132, 132)
+                                .addComponent(jLabel1))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(174, 174, 174)
+                                .addComponent(JBProdutos)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 86, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(32, 32, 32)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(31, 31, 31)
+                .addComponent(JBProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(JBRelatorios)
+                    .addComponent(JBCategorias))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(43, 43, 43)
-                .addComponent(JBProdutos1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(JBCategorias)
-                    .addComponent(JBRelatorios, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(18, 18, 18)
-                .addComponent(JBMovimentacao)
-                .addGap(18, 18, 18)
-                .addComponent(JBSair, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(91, Short.MAX_VALUE))
+                .addComponent(JBMovimentação)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(JBSair)
+                .addContainerGap(62, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * Trata o evento de clique no botão Sair.
-     * Solicita confirmação do usuário antes de encerrar a aplicação.
-     * 
-     * @param evt Evento de ação do botão
-     */
+    private void JBRelatoriosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRelatoriosActionPerformed
+        FrmRelatorio tela = new FrmRelatorio(this.clienteRMI);
+        tela.setVisible(true);
+    }//GEN-LAST:event_JBRelatoriosActionPerformed
+
     private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed
-        int resposta = JOptionPane.showConfirmDialog(this, "Deseja realmente sair?", "Sair", JOptionPane.YES_NO_OPTION);
-        if (resposta == JOptionPane.YES_OPTION) {
-            if (clienteRMI != null) {
-                clienteRMI.desconectar();
-            }
-            System.exit(0);
-        }
+        this.dispose();
     }//GEN-LAST:event_JBSairActionPerformed
 
-    /**
-     * Trata o evento de clique no botão Movimentação de Estoque.
-     * Abre a tela de movimentação se o servidor estiver conectado.
-     * 
-     * @param evt Evento de ação do botão
-     */
-    private void JBMovimentacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBMovimentacaoActionPerformed
-        if (estoqueService != null) {
-            FrmMovimentacaoDeEstoque frm = new FrmMovimentacaoDeEstoque(estoqueService);
-            frm.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-        }
-    }//GEN-LAST:event_JBMovimentacaoActionPerformed
+    private void JBProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBProdutosActionPerformed
+        FrmListadeProduto tela = new FrmListadeProduto(this.clienteRMI);
+        tela.setVisible(true);
+
+    }//GEN-LAST:event_JBProdutosActionPerformed
+
+    private void JBCategoriasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCategoriasActionPerformed
+        FrmListadeCategoria tela = new FrmListadeCategoria(this.clienteRMI);
+        tela.setVisible(true);
+    }//GEN-LAST:event_JBCategoriasActionPerformed
+
+    private void JBMovimentaçãoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBMovimentaçãoActionPerformed
+        FrmMovimentacaoDeEstoque tela = new FrmMovimentacaoDeEstoque(this.clienteRMI);
+        tela.setVisible(true);
+    }//GEN-LAST:event_JBMovimentaçãoActionPerformed
 
     /**
-     * Trata o evento de clique no botão Produtos.
-     * Abre a tela de listagem de produtos se o servidor estiver conectado.
-     * 
-     * @param evt Evento de ação do botão
+     * @param args the command line arguments
      */
-    private void JBProdutos1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBProdutos1ActionPerformed
-        if (clienteRMI != null && clienteRMI.estaConectado()) {
-            FrmListadeProduto frm = new FrmListadeProduto(clienteRMI, this);
-            frm.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(FrmTelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(FrmTelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(FrmTelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(FrmTelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_JBProdutos1ActionPerformed
+        //</editor-fold>
 
-    /**
-     * Trata o evento de clique no botão Relatórios.
-     * Abre a tela de relatórios se o servidor estiver conectado.
-     * 
-     * @param evt Evento de ação do botão
-     */
-    private void JBRelatoriosActionPerformed(java.awt.event.ActionEvent evt) {
-        if (estoqueService != null) {
-            FrmRelatorio frm = new FrmRelatorio(estoqueService);
-            frm.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-        }
-    }
-
-    /**
-     * Trata o evento de clique no botão Categorias.
-     * Abre a tela de listagem de categorias se o servidor estiver conectado.
-     * 
-     * @param evt Evento de ação do botão
-     */
-    private void JBCategoriasActionPerformed(java.awt.event.ActionEvent evt) {
-        if (clienteRMI != null && clienteRMI.estaConectado()) {
-            FrmListadeCategoria frm = new FrmListadeCategoria(clienteRMI, this);
-            frm.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
-        }
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new FrmTelaPrincipal().setVisible(true);
+            }
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JToggleButton JBCategorias;
-    private javax.swing.JToggleButton JBMovimentacao;
-    private javax.swing.JButton JBProdutos1;
-    private javax.swing.JToggleButton JBRelatorios;
+    private javax.swing.JButton JBCategorias;
+    private javax.swing.JButton JBMovimentação;
+    private javax.swing.JButton JBProdutos;
+    private javax.swing.JButton JBRelatorios;
     private javax.swing.JButton JBSair;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JSeparator jSeparator1;
     // End of variables declaration//GEN-END:variables
 }
