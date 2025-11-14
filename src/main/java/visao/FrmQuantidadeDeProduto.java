@@ -2,12 +2,10 @@
 package visao;
 
 import cliente.ClienteRMI;
-import interfaces.EstoqueService;
+import service.EstoqueService;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import modelo.Categoria;
-import modelo.Produto;
 
 
 
@@ -20,11 +18,18 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
     public FrmQuantidadeDeProduto() {
         initComponents();
         conectarServidorRMI();
-        atualizarTabela();
+        carregarQuantidadePorCategoria();
 
     }
     
-    private void conectarServidorRMI() {
+    public FrmQuantidadeDeProduto(ClienteRMI clienteRMI) {
+        initComponents();
+        this.clienteRMI = clienteRMI;
+        conectarServidorRMI();
+        carregarQuantidadePorCategoria();
+    }
+    
+     private void conectarServidorRMI() {
         try {
             if (clienteRMI == null)
                 clienteRMI = new ClienteRMI();
@@ -32,15 +37,37 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
             if (clienteRMI.conectar()) {
                 estoqueService = clienteRMI.getService();
             } else {
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(this, 
                         "Não foi possível conectar ao servidor RMI.");
             }
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Erro ao conectar: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "Erro ao conectar ao servidor: " + e.getMessage());
         }
     }
+     
+     private void carregarQuantidadePorCategoria() {
+    try {
+        List<String[]> dados = estoqueService.listarQuantidadePorCategoria();
+
+        String[] colunas = {"Categoria", "Quantidade total"};
+        DefaultTableModel model = new DefaultTableModel(colunas, 0);
+
+        for (String[] linha : dados) {
+            model.addRow(new Object[]{
+                linha[0], 
+                linha[1]  
+            });
+        }
+
+        JTQuantidadeProdutoCategoria.setModel(model);
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+                "Erro ao carregar quantidade por categoria: " + e.getMessage());
+    }
+}
     
 
     
@@ -131,45 +158,13 @@ public class FrmQuantidadeDeProduto extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-private void atualizarTabela() {
-        try {
-            List<Categoria> categorias = estoqueService.listarCategorias();
 
-            DefaultTableModel model =
-                    (DefaultTableModel) JTQuantidadeProdutoCategoria.getModel();
 
-            model.setRowCount(0); // limpa tabela
-
-            for (Categoria cat : categorias) {
-
-                int total = 0;
-
-                List<Produto> produtos =
-                        estoqueService.listarProdutosPorCategoria(cat.getId());
-
-                for (Produto p : produtos) {
-                    total += p.getQuantidade();
-                }
-
-                model.addRow(new Object[]{
-                    cat.getNome(),
-                    total
-                });
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Erro ao carregar dados: " + e.getMessage());
-        }
-    }
     private void JBAtualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAtualizarActionPerformed
-        atualizarTabela();
+        carregarQuantidadePorCategoria();
     }//GEN-LAST:event_JBAtualizarActionPerformed
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
-        if (janelaAnterior != null) {
-            janelaAnterior.setVisible(true);
-        }
         dispose();
     }//GEN-LAST:event_JBFecharActionPerformed
 
@@ -217,4 +212,8 @@ private void atualizarTabela() {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     // End of variables declaration//GEN-END:variables
+
+
+
 }
+

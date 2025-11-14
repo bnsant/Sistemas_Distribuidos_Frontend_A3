@@ -2,11 +2,11 @@
 package visao;
 
 import cliente.ClienteRMI;
-import interfaces.EstoqueService;
+import modelo.Produto;
+import service.EstoqueService;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import modelo.Produto;
 
 
 public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
@@ -18,7 +18,7 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
     public FrmProdutoAbaixoDoMin() {
         initComponents();
         conectarServidorRMI();
-        carregarProdutosAbaixoDoMinimo(null);
+        carregarProdutosAbaixo();
 
     }
     
@@ -26,27 +26,26 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
         initComponents();
         this.clienteRMI = clienteRMI;
         conectarServidorRMI();
-        carregarProdutosAbaixoDoMinimo(null);
+        carregarProdutosAbaixo();
     }
     
     private void conectarServidorRMI() {
         try {
-            if (this.clienteRMI == null)
-                this.clienteRMI = new ClienteRMI();
+            if (clienteRMI == null)
+                clienteRMI = new ClienteRMI();
 
-            if (this.clienteRMI.conectar()) {
-                this.estoqueService = this.clienteRMI.getService();
+            if (clienteRMI.conectar()) {
+                estoqueService = clienteRMI.getService();
             } else {
                 JOptionPane.showMessageDialog(this,
-                    "Erro ao conectar ao servidor RMI.");
+                        "Erro ao conectar ao servidor RMI.");
             }
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                "Erro ao conectar ao servidor: " + e.getMessage());
+                    "Erro ao conectar: " + e.getMessage());
         }
     }
-
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -160,53 +159,45 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-private void carregarProdutosAbaixoDoMinimo(String filtro) {
+ private void carregarProdutosAbaixo() {
         try {
-            DefaultTableModel model =
-                (DefaultTableModel) JTProdutoAbaixo.getModel();
-            model.setRowCount(0);
+            List<Produto> lista = estoqueService.listarProdutosAbaixoMinimo();
 
-            List<Produto> produtos = estoqueService.listarProdutos();
+            String[] colunas = {
+                "ID", "Nome", "Categoria", "Preço", "Quantidade", "Mínimo"
+            };
 
-            for (Produto p : produtos) {
+            DefaultTableModel model = new DefaultTableModel(colunas, 0);
 
-                boolean abaixo = p.getQuantidade() < p.getQuantidade_minima();
-
-                boolean filtraCategoria =
-                    filtro != null &&
-                    !filtro.equals("Todas") &&
-                    !p.getCategoria().getNome().equalsIgnoreCase(filtro);
-
-                if (!abaixo || filtraCategoria)
-                    continue;
-
+            for (Produto p : lista) {
                 model.addRow(new Object[]{
-                    p.getId_produto(),
+                    p.getId(),
                     p.getNome(),
-                    p.getCategoria().getNome(),
+                    p.getCategoria(),
+                    p.getPreco(),
                     p.getQuantidade(),
-                    p.getQuantidade_minima()
+                    p.getMin()
                 });
             }
 
+            JTProdutoAbaixo.setModel(model);
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                "Erro ao carregar produtos: " + e.getMessage());
+                    "Erro ao carregar produtos: " + e.getMessage());
         }
     }
+
     private void JBBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBBuscarActionPerformed
-        String filtro = (String) JCBFiltro.getSelectedItem();
-        carregarProdutosAbaixoDoMinimo(filtro);
+         carregarProdutosAbaixo();
     }//GEN-LAST:event_JBBuscarActionPerformed
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
         this.dispose();
-        janelaAnterior.setVisible(true);
     }//GEN-LAST:event_JBFecharActionPerformed
 
     private void JCBFiltroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JCBFiltroActionPerformed
-        String filtro = (String) JCBFiltro.getSelectedItem();
-        carregarProdutosAbaixoDoMinimo(filtro);
+        carregarProdutosAbaixo();
     }//GEN-LAST:event_JCBFiltroActionPerformed
 
     /**
