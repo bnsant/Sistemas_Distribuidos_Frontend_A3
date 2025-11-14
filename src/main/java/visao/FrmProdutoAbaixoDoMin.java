@@ -1,77 +1,88 @@
-
 package visao;
 
-import cliente.ClienteRMI;
-import interfaces.EstoqueService;
-import java.util.List;
+import service.EstoqueService;
 import javax.swing.JOptionPane;
+import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import modelo.Produto;
 
-
+/**
+ * Tela para exibição de produtos com quantidade abaixo do mínimo permitido.
+ * Ajuda a identificar produtos que precisam de reposição.
+ * 
+ * @author Sistema de Controle de Estoque
+ * @version 1.0
+ */
 public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
-    
-    private ClienteRMI clienteRMI;
-    private EstoqueService estoqueService;
 
+    /**
+     * Serviço remoto de estoque para comunicação com o servidor RMI.
+     */
+    private EstoqueService estoqueService;
     
+    /**
+     * Construtor padrão que inicializa apenas os componentes da interface.
+     */
     public FrmProdutoAbaixoDoMin() {
         initComponents();
-        conectarServidorRMI();
-        carregarProdutosAbaixoDoMinimo(null);
-
     }
     
-    public FrmProdutoAbaixoDoMin(ClienteRMI clienteRMI) {
+    /**
+     * Construtor que recebe o serviço de estoque e carrega os dados.
+     * 
+     * @param estoqueService Serviço remoto de estoque
+     */
+    public FrmProdutoAbaixoDoMin(EstoqueService estoqueService) {
+        this.estoqueService = estoqueService;
         initComponents();
-        this.clienteRMI = clienteRMI;
-        conectarServidorRMI();
-        carregarProdutosAbaixoDoMinimo(null);
+        carregarProdutosAbaixoDoMin();
     }
     
-    private void conectarServidorRMI() {
+    /**
+     * Carrega a lista de produtos abaixo do mínimo e exibe na tabela.
+     */
+    private void carregarProdutosAbaixoDoMin() {
+        if (estoqueService == null) {
+            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
+            return;
+        }
+        
         try {
-            if (this.clienteRMI == null)
-                this.clienteRMI = new ClienteRMI();
-
-            if (this.clienteRMI.conectar()) {
-                this.estoqueService = this.clienteRMI.getService();
-            } else {
-                JOptionPane.showMessageDialog(this,
-                    "Erro ao conectar ao servidor RMI.");
+            List<Produto> produtos = estoqueService.listarProdutosAbaixoMinimo();
+            DefaultTableModel modelo = (DefaultTableModel) JTProdutoAbaixo.getModel();
+            modelo.setRowCount(0);
+            
+            for (Produto p : produtos) {
+                modelo.addRow(new Object[]{
+                    p.getId(),
+                    p.getNome(),
+                    p.getQuantidade(),
+                    p.getMin(),
+                    p.getMax()
+                });
             }
-
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao conectar ao servidor: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
         }
     }
 
-    
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
 
+        jLabel1 = new javax.swing.JLabel();
         JCBFiltro = new javax.swing.JComboBox<>();
-        JBBuscar = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        JBBuscar = new javax.swing.JToggleButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         JTProdutoAbaixo = new javax.swing.JTable();
-        jSeparator2 = new javax.swing.JSeparator();
-        jSeparator3 = new javax.swing.JSeparator();
-        JBFechar = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
+        JBFechar = new javax.swing.JToggleButton();
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        jLabel1.setText("Filtro por Categoria:");
+
         JCBFiltro.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        JCBFiltro.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JCBFiltroActionPerformed(evt);
-            }
-        });
 
         JBBuscar.setText("Buscar");
         JBBuscar.addActionListener(new java.awt.event.ActionListener() {
@@ -88,14 +99,11 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
                 {null, null, null, null, null}
             },
             new String [] {
-                "ID", "Nome", "Quantidade", "Mínimo", "Máximo"
+                "Id", "Nome", "Quantidade", "Minimo", "Máximo"
             }
         ));
         jScrollPane1.setViewportView(JTProdutoAbaixo);
 
-        jScrollPane2.setViewportView(jScrollPane1);
-
-        JBFechar.setBackground(new java.awt.Color(220, 53, 69));
         JBFechar.setText("Fechar");
         JBFechar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -103,121 +111,63 @@ public class FrmProdutoAbaixoDoMin extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Produtos Abaixo do Mínimo/Máximo");
-
-        jLabel2.setText("Filtro por Categoria:");
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel2.setText("Produtos Abaixo do Mínimo/Máximo");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
-            .addComponent(jSeparator2)
-            .addComponent(jSeparator3)
             .addGroup(layout.createSequentialGroup()
+                .addGap(39, 39, 39)
+                .addComponent(jLabel1)
+                .addGap(18, 18, 18)
+                .addComponent(JCBFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(73, 73, 73)
+                .addComponent(JBBuscar)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(117, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(59, 59, 59)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(91, 91, 91))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(JBFechar)
+                        .addGap(281, 281, 281))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(JCBFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(46, 46, 46)
-                        .addComponent(JBBuscar))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(172, 172, 172)
-                        .addComponent(jLabel1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(290, 290, 290)
-                        .addComponent(JBFechar))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(108, 108, 108)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(98, Short.MAX_VALUE))
+                        .addGap(156, 156, 156))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel1)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(JCBFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(JBBuscar))
+                    .addComponent(jLabel1))
                 .addGap(18, 18, 18)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(JCBFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(JBBuscar))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(48, 48, 48)
                 .addComponent(JBFechar)
-                .addContainerGap(30, Short.MAX_VALUE))
+                .addGap(19, 19, 19))
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
-private void carregarProdutosAbaixoDoMinimo(String filtro) {
-        try {
-            DefaultTableModel model =
-                (DefaultTableModel) JTProdutoAbaixo.getModel();
-            model.setRowCount(0);
-
-            List<Produto> produtos = estoqueService.listarProdutos();
-
-            for (Produto p : produtos) {
-
-                boolean abaixo = p.getQuantidade() < p.getQuantidade_minima();
-
-                boolean filtraCategoria =
-                    filtro != null &&
-                    !filtro.equals("Todas") &&
-                    !p.getCategoria().getNome().equalsIgnoreCase(filtro);
-
-                if (!abaixo || filtraCategoria)
-                    continue;
-
-                model.addRow(new Object[]{
-                    p.getId_produto(),
-                    p.getNome(),
-                    p.getCategoria().getNome(),
-                    p.getQuantidade(),
-                    p.getQuantidade_minima()
-                });
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao carregar produtos: " + e.getMessage());
-        }
     }
-    private void JBBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBBuscarActionPerformed
-        String filtro = (String) JCBFiltro.getSelectedItem();
-        carregarProdutosAbaixoDoMinimo(filtro);
-    }//GEN-LAST:event_JBBuscarActionPerformed
 
-    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
+    private void JBBuscarActionPerformed(java.awt.event.ActionEvent evt) {
+        carregarProdutosAbaixoDoMin();
+    }
+    
+    private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {
         this.dispose();
-        janelaAnterior.setVisible(true);
-    }//GEN-LAST:event_JBFecharActionPerformed
+    }
 
-    private void JCBFiltroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JCBFiltroActionPerformed
-        String filtro = (String) JCBFiltro.getSelectedItem();
-        carregarProdutosAbaixoDoMinimo(filtro);
-    }//GEN-LAST:event_JCBFiltroActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -234,9 +184,7 @@ private void carregarProdutosAbaixoDoMinimo(String filtro) {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(FrmProdutoAbaixoDoMin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new FrmProdutoAbaixoDoMin().setVisible(true);
@@ -244,17 +192,12 @@ private void carregarProdutosAbaixoDoMinimo(String filtro) {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton JBBuscar;
-    private javax.swing.JButton JBFechar;
+    private javax.swing.JToggleButton JBBuscar;
+    private javax.swing.JToggleButton JBFechar;
     private javax.swing.JComboBox<String> JCBFiltro;
     private javax.swing.JTable JTProdutoAbaixo;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
-    // End of variables declaration//GEN-END:variables
+
 }

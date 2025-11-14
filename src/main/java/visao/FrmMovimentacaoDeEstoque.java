@@ -1,59 +1,116 @@
-
 package visao;
 
-import cliente.ClienteRMI;
-import interfaces.EstoqueService;
-import java.util.List;
+import service.EstoqueService;
+import modelo.Produto;
+import modelo.RegistroMovimentacao;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import modelo.Movimentacao;
-import modelo.Produto;
+import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
-
+/**
+ * Tela para registro e visualização de movimentações de estoque (entradas e saídas).
+ * Permite registrar novas movimentações e visualizar o histórico de movimentações.
+ * 
+ * @author Sistema de Controle de Estoque
+ * @version 1.0
+ */
 public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
-    
-    private ClienteRMI clienteRMI;
-    private EstoqueService estoqueService;
 
+    /**
+     * Serviço remoto de estoque para comunicação com o servidor RMI.
+     */
+    private EstoqueService estoqueService;
     
+    /**
+     * Construtor padrão que inicializa apenas os componentes da interface.
+     */
     public FrmMovimentacaoDeEstoque() {
         initComponents();
-        conectarServidorRMI();
-        carregarProdutos();
-        carregarMovimentacoes();
     }
     
-    public FrmMovimentacaoDeEstoque(ClienteRMI clienteRMI) {
+    /**
+     * Construtor que recebe o serviço de estoque e carrega os dados iniciais.
+     * 
+     * @param estoqueService Serviço remoto de estoque
+     */
+    public FrmMovimentacaoDeEstoque(EstoqueService estoqueService) {
+        this.estoqueService = estoqueService;
         initComponents();
-        this.clienteRMI = clienteRMI;
-        conectarServidorRMI();
         carregarProdutos();
         carregarMovimentacoes();
     }
     
-    private void conectarServidorRMI() {
+    /**
+     * Carrega a lista de produtos do servidor e popula o combo box de produtos.
+     */
+    private void carregarProdutos() {
+        if (estoqueService == null) {
+            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
+            return;
+        }
+        
         try {
-            if (this.clienteRMI == null)
-                this.clienteRMI = new ClienteRMI();
-
-            if (this.clienteRMI.conectar()) {
-                this.estoqueService = this.clienteRMI.getService();
-            } else {
-                JOptionPane.showMessageDialog(this,
-                    "Não foi possível conectar ao servidor RMI.");
+            List<Produto> produtos = estoqueService.listarProdutos();
+            JCBProduto.removeAllItems();
+            for (Produto p : produtos) {
+                JCBProduto.addItem(p.getNome());
             }
-
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao conectar ao servidor: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Carrega o histórico de movimentações do servidor e exibe na tabela.
+     */
+    private void carregarMovimentacoes() {
+        if (estoqueService == null) {
+            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
+            return;
+        }
+        
+        try {
+            List<RegistroMovimentacao> movimentacoes = estoqueService.listarMovimentacoes();
+            DefaultTableModel modelo = (DefaultTableModel) JTMovimentacao.getModel();
+            modelo.setRowCount(0);
+            
+            for (RegistroMovimentacao m : movimentacoes) {
+                try {
+                    Produto produto = estoqueService.buscarProdutoPorId(m.getProdutoId());
+                    String nomeProduto = produto != null ? produto.getNome() : "Produto ID: " + m.getProdutoId();
+                    int saldo = produto != null ? produto.getQuantidade() : 0;
+                    
+                    modelo.addRow(new Object[]{
+                        m.getDataMovimentacao(),
+                        nomeProduto,
+                        m.getTipoMovimentacao(),
+                        m.getQuantidade(),
+                        saldo
+                    });
+                } catch (Exception e) {
+                    modelo.addRow(new Object[]{
+                        m.getDataMovimentacao(),
+                        "Produto ID: " + m.getProdutoId(),
+                        m.getTipoMovimentacao(),
+                        m.getQuantidade(),
+                        "-"
+                    });
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar movimentações: " + e.getMessage());
         }
     }
 
-    
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
 
+        jSeparator1 = new javax.swing.JSeparator();
+        JBRegistrar = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
         JBLimpar = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         JBSair = new javax.swing.JButton();
@@ -68,12 +125,18 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
         JRBSaida = new javax.swing.JRadioButton();
         JTFQuantidade = new javax.swing.JTextField();
         JTFData = new javax.swing.JTextField();
-        jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
-        JBRegistrar = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        JBRegistrar.setText("Registrar");
+        JBRegistrar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBRegistrarActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setText("Produto:");
 
         JBLimpar.setText("Limpar");
         JBLimpar.addActionListener(new java.awt.event.ActionListener() {
@@ -127,233 +190,215 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
 
         JRBSaida.setText("Saída");
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Movimentação de Estoque");
-
-        JBRegistrar.setText("Registrar");
-        JBRegistrar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JBRegistrarActionPerformed(evt);
-            }
-        });
-
-        jLabel2.setText("Produto:");
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));jLabel1.setText("Movimentação de Estoque");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator2)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jSeparator1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1)
-                .addGap(197, 197, 197))
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(25, 25, 25)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(JTFQuantidade, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(JCBProduto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(JRBEntrada)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(JRBSaida))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(JTFData, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(126, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(JBRegistrar)
-                .addGap(18, 18, 18)
-                .addComponent(JBLimpar)
-                .addGap(18, 18, 18)
-                .addComponent(JBSair)
-                .addGap(192, 192, 192))
+                .addGap(187, 187, 187)
+                .addComponent(jLabel1)
+                .addContainerGap(210, Short.MAX_VALUE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jSeparator1)
+                        .addComponent(jSeparator2)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(25, 25, 25)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel4)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(JTFQuantidade, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel2)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(JCBProduto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel3)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(JRBEntrada)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(JRBSaida))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(jLabel5)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(JTFData, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel6)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 126, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addComponent(JBRegistrar)
+                            .addGap(18, 18, 18)
+                            .addComponent(JBLimpar)
+                            .addGap(18, 18, 18)
+                            .addComponent(JBSair)
+                            .addGap(192, 192, 192)))
+                    .addContainerGap()))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel1)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(JCBProduto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(JRBEntrada)
-                    .addComponent(JRBSaida))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(JTFQuantidade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(JTFData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(JBRegistrar)
-                    .addComponent(JBLimpar)
-                    .addComponent(JBSair))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6))
-                .addGap(40, 40, 40))
+                .addComponent(jLabel1)
+                .addContainerGap(497, Short.MAX_VALUE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(37, 37, 37)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel2)
+                        .addComponent(JCBProduto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3)
+                        .addComponent(JRBEntrada)
+                        .addComponent(JRBSaida))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel4)
+                        .addComponent(JTFQuantidade, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel5)
+                        .addComponent(JTFData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(JBRegistrar)
+                        .addComponent(JBLimpar)
+                        .addComponent(JBSair))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel6))
+                    .addGap(37, 37, 37)))
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
-private void carregarProdutos() {
-        try {
-            List<Produto> lista = estoqueService.listarProdutos();
-            JCBProduto.removeAllItems();
-            for (Produto p : lista) {
-                JCBProduto.addItem(p.getNome());
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao carregar produtos: " + e.getMessage());
+    }
+
+    /**
+     * Trata o evento de clique no botão Registrar.
+     * Valida os dados informados e registra uma nova movimentação no servidor.
+     * Atualiza a quantidade do produto e recarrega a lista de movimentações.
+     * 
+     * @param evt Evento de ação do botão
+     */
+    private void JBRegistrarActionPerformed(java.awt.event.ActionEvent evt) {
+        if (estoqueService == null) {
+            JOptionPane.showMessageDialog(this, "Servidor não conectado!");
+            return;
         }
-    }
-
-private void carregarMovimentacoes() {
+        
         try {
-            DefaultTableModel model =
-                (DefaultTableModel) JTMovimentacao.getModel();
-
-            model.setRowCount(0);
-
-            List<Movimentacao> movs = estoqueService.listarMovimentacoes();
-
-            for (Movimentacao m : movs) {
-                model.addRow(new Object[]{
-                    m.getId(),
-                    m.getProduto().getNome(),
-                    m.getTipo(),
-                    m.getQuantidade(),
-                    m.getData()
-                });
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao carregar movimentações: " + e.getMessage());
-        }
-    }
-
-    
-    private void limparCampos() {
-        JTFQuantidade.setText("");
-        JTFData.setText("");
-        JREntrada.setSelected(true);
-    }
-    private void JBLimparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBLimparActionPerformed
-        limparCampos();
-    }//GEN-LAST:event_JBLimparActionPerformed
-
-    private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed
-        this.dispose();
-        janelaAnterior.setVisible(true);
-    }//GEN-LAST:event_JBSairActionPerformed
-
-    private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jScrollPane1AncestorAdded
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jScrollPane1AncestorAdded
-
-    private void JBRegistrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRegistrarActionPerformed
-        private void JBRegistrarActionPerformed(java.awt.event.ActionEvent evt) {
-
-        try {
-            String produtoNome = (String) JCBProduto.getSelectedItem();
-            if (produtoNome == null) {
+            String nomeProduto = (String) JCBProduto.getSelectedItem();
+            if (nomeProduto == null || nomeProduto.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Selecione um produto.");
                 return;
             }
-
-            List<Produto> lista = estoqueService.listarProdutos();
-            Produto produto = lista.stream()
-                    .filter(p -> p.getNome().equals(produtoNome))
-                    .findFirst()
-                    .orElse(null);
-
+            
+            // Buscar o produto pelo nome
+            List<Produto> produtos = estoqueService.listarProdutos();
+            Produto produto = null;
+            for (Produto p : produtos) {
+                if (p.getNome().equals(nomeProduto)) {
+                    produto = p;
+                    break;
+                }
+            }
+            
             if (produto == null) {
-                JOptionPane.showMessageDialog(this, "Produto inválido.");
+                JOptionPane.showMessageDialog(this, "Produto não encontrado.");
                 return;
             }
-
-            int qtd = Integer.parseInt(JTFQuantidade.getText());
-            String data = JTFData.getText();
-
-            String tipo = JREntrada.isSelected() ? "Entrada" : "Saída";
-
-            if (tipo.equals("Saída") && qtd > produto.getQuantidade()) {
-                JOptionPane.showMessageDialog(this,
-                    "Saída maior que a quantidade em estoque.");
-                return;
-            }
-
             
-            int novoEstoque = tipo.equals("Entrada")
-                    ? produto.getQuantidade() + qtd
-                    : produto.getQuantidade() - qtd;
-
-            produto.setQuantidade(novoEstoque);
+            String quantidadeTexto = JTFQuantidade.getText().trim();
+            if (quantidadeTexto.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Informe a quantidade.");
+                return;
+            }
+            
+            int quantidade = Integer.parseInt(quantidadeTexto);
+            if (quantidade <= 0) {
+                JOptionPane.showMessageDialog(this, "A quantidade deve ser maior que zero.");
+                return;
+            }
+            
+            String tipo = JRBEntrada.isSelected() ? "Entrada" : (JRBSaida.isSelected() ? "Saída" : "");
+            if (tipo.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Selecione o tipo de movimentação (Entrada ou Saída).");
+                return;
+            }
+            
+            String data = JTFData.getText().trim();
+            if (data.isEmpty()) {
+                LocalDate hoje = LocalDate.now();
+                data = hoje.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            }
+            
+            RegistroMovimentacao movimentacao = new RegistroMovimentacao();
+            movimentacao.setProdutoId(produto.getId());
+            movimentacao.setTipoMovimentacao(tipo);
+            movimentacao.setQuantidade(quantidade);
+            movimentacao.setDataMovimentacao(data);
+            
+            estoqueService.registrarMovimentacao(movimentacao);
+            
+            if (tipo.equals("Entrada")) {
+                produto.setQuantidade(produto.getQuantidade() + quantidade);
+            } else {
+                produto.setQuantidade(produto.getQuantidade() - quantidade);
+            }
             estoqueService.atualizarProduto(produto);
-
             
-            Movimentacao mov = new Movimentacao();
-            mov.setProduto(produto);
-            mov.setQuantidade(qtd);
-            mov.setTipo(tipo);
-            mov.setData(data);
-
-            estoqueService.registrarMovimentacao(mov);
-
-            JOptionPane.showMessageDialog(this,
-                "Movimentação registrada com sucesso!");
-
+            JOptionPane.showMessageDialog(this, tipo + " registrada com sucesso!");
             carregarMovimentacoes();
-            limparCampos();
-
+            JBLimparActionPerformed(null);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Quantidade inválida. Digite um número inteiro.");
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao registrar movimentação: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao registrar movimentação: " + e.getMessage());
         }
-    }//GEN-LAST:event_JBRegistrarActionPerformed
+    }
 
     /**
-     * @param args the command line arguments
+     * Trata o evento de clique no botão Limpar.
+     * Limpa todos os campos do formulário de movimentação.
+     * 
+     * @param evt Evento de ação do botão
      */
+    private void JBLimparActionPerformed(java.awt.event.ActionEvent evt) {
+        JCBProduto.setSelectedIndex(-1);
+        JTFQuantidade.setText("");
+        JTFData.setText("");
+        JRBEntrada.setSelected(false);
+        JRBSaida.setSelected(false);
+    }
+
+    /**
+     * Trata o evento de clique no botão Sair.
+     * Fecha a janela de movimentação.
+     * 
+     * @param evt Evento de ação do botão
+     */
+    private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {
+        this.dispose();
+    }
+
+    private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {
+    }
+
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -370,9 +415,7 @@ private void carregarMovimentacoes() {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(FrmMovimentacaoDeEstoque.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new FrmMovimentacaoDeEstoque().setVisible(true);
@@ -380,7 +423,6 @@ private void carregarMovimentacoes() {
         });
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBLimpar;
     private javax.swing.JButton JBRegistrar;
     private javax.swing.JButton JBSair;
@@ -399,5 +441,5 @@ private void carregarMovimentacoes() {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    // End of variables declaration//GEN-END:variables
+
 }

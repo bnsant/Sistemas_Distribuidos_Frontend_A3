@@ -1,83 +1,158 @@
-
 package visao;
 
 import cliente.ClienteRMI;
-import interfaces.EstoqueService;
-import java.util.List;
+import modelo.Produto;
+import service.EstoqueService;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import modelo.Categoria;
-import modelo.Produto;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.ArrayList;
 
-
+/**
+ * Tela para listagem e gerenciamento de produtos no sistema de controle de estoque.
+ * Permite visualizar, buscar, cadastrar, editar e excluir produtos.
+ * 
+ * @author Sistema de Controle de Estoque
+ * @version 1.0
+ */
 public class FrmListadeProduto extends javax.swing.JFrame {
-    
-    private ClienteRMI clienteRMI;
-    private EstoqueService estoqueService;
 
+    /**
+     * Cliente RMI para comunicação com o servidor.
+     */
+    private ClienteRMI clienteRMI;
     
+    /**
+     * Referência à janela anterior para retorno.
+     */
+    private javax.swing.JFrame janelaAnterior;
+    
+    /**
+     * Construtor padrão que inicializa a tela e cria uma nova conexão RMI.
+     */
     public FrmListadeProduto() {
         initComponents();
-        conectarServidorRMI();
-        carregarCategorias();
-        carregarTabelaProdutos();
+        clienteRMI = new ClienteRMI();
+        if (!clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarTabelaProdutos();
+            carregarCategorias();
+        }
     }
     
-    public FrmListadeProduto(ClienteRMI clienteRMI) {
+    /**
+     * Construtor que recebe cliente RMI e janela anterior.
+     * 
+     * @param cliente Cliente RMI para comunicação com o servidor
+     * @param anterior Janela anterior para retorno
+     */
+    public FrmListadeProduto(ClienteRMI cliente, javax.swing.JFrame anterior) {
         initComponents();
-        this.clienteRMI = clienteRMI;
-        conectarServidorRMI();
-        carregarCategorias();
-        carregarTabelaProdutos();
+        this.clienteRMI = cliente;
+        this.janelaAnterior = anterior;
+        if (!clienteRMI.estaConectado() && !clienteRMI.conectar()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não foi possível conectar ao servidor RMI.",
+                "Erro de Conexão", 
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            carregarTabelaProdutos();
+            carregarCategorias();
+        }
     }
     
-    public ClienteRMI getClienteRMI() {
-        return this.clienteRMI;
-    }
-    
-    private void conectarServidorRMI() {
+    /**
+     * Carrega as categorias do servidor e popula o combo box de filtro.
+     */
+    private void carregarCategorias() {
         try {
-            if (clienteRMI == null)
-                clienteRMI = new ClienteRMI();
-
-            if (clienteRMI.conectar()) {
-                estoqueService = clienteRMI.getService();
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro ao conectar ao servidor RMI.");
+            EstoqueService service = clienteRMI.getService();
+            List<modelo.Categoria> categorias = service.listarCategorias();
+            List<String> nomesCategorias = new ArrayList<>();
+            nomesCategorias.add("Todas");
+            for (modelo.Categoria cat : categorias) {
+                nomesCategorias.add(cat.getNomeCategoria());
+            }
+            JCBCategoria1.setModel(new javax.swing.DefaultComboBoxModel<>(nomesCategorias.toArray(new String[0])));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Carrega a lista de produtos do servidor e exibe na tabela.
+     */
+    public void carregarTabelaProdutos() {
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Produto> produtos = service.listarProdutos();
+            
+            DefaultTableModel modelo = (DefaultTableModel) JTTabelaProdutos.getModel();
+            modelo.setRowCount(0);
+            
+            for (Produto p : produtos) {
+                modelo.addRow(new Object[]{
+                    p.getId(),
+                    p.getNome(),
+                    p.getQuantidade(),
+                    p.getUnidade(),
+                    p.getCategoria()
+                });
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
         }
     }
 
-    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        JBReajustar = new javax.swing.JButton();
-        JTFBuscar = new javax.swing.JTextField();
+        JLBuscar = new javax.swing.JLabel();
+        JLCategoria = new javax.swing.JLabel();
         JCBCategoria = new javax.swing.JComboBox<>();
+        jLabel1 = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        JLBuscar1 = new javax.swing.JLabel();
+        JTFBuscar = new javax.swing.JTextField();
+        JLCategoria1 = new javax.swing.JLabel();
+        JCBCategoria1 = new javax.swing.JComboBox<>();
         JBFiltrar = new javax.swing.JButton();
-        JSPTabeladeProdutos = new javax.swing.JScrollPane();
-        JTTabelaProdutos = new javax.swing.JTable();
         JBNovoProduto = new javax.swing.JButton();
         JBEditar = new javax.swing.JButton();
         JBExcluir = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
-        JLBuscar = new javax.swing.JLabel();
         JBVoltarLP = new javax.swing.JButton();
-        JLCategoria = new javax.swing.JLabel();
+        JBReajustar = new javax.swing.JButton();
+        JSPTabeladeProdutos = new javax.swing.JScrollPane();
+        JTTabelaProdutos = new javax.swing.JTable();
+
+        JLBuscar.setText("Buscar:");
+
+        JLCategoria.setText("Categoria:");
+
+        JCBCategoria.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        JCBCategoria.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JCBCategoriaActionPerformed(evt);
+            }
+        });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        JBReajustar.setText("Reajustar Preços");
-        JBReajustar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JBReajustarActionPerformed(evt);
-            }
-        });
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel1.setText("Lista de Produtos");
+
+        JLBuscar1.setText("Buscar:");
 
         JTFBuscar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -85,10 +160,12 @@ public class FrmListadeProduto extends javax.swing.JFrame {
             }
         });
 
-        JCBCategoria.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        JCBCategoria.addActionListener(new java.awt.event.ActionListener() {
+        JLCategoria1.setText("Categoria:");
+
+        JCBCategoria1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        JCBCategoria1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                JCBCategoriaActionPerformed(evt);
+                JCBCategoria1ActionPerformed(evt);
             }
         });
 
@@ -98,19 +175,6 @@ public class FrmListadeProduto extends javax.swing.JFrame {
                 JBFiltrarActionPerformed(evt);
             }
         });
-
-        JTTabelaProdutos.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "Nome", "Quantidade", "Unidade", "Categoria"
-            }
-        ));
-        JSPTabeladeProdutos.setViewportView(JTTabelaProdutos);
 
         JBNovoProduto.setText("Novo Produto");
         JBNovoProduto.addActionListener(new java.awt.event.ActionListener() {
@@ -134,11 +198,6 @@ public class FrmListadeProduto extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setText("Lista de Produtos");
-
-        JLBuscar.setText("Buscar:");
-
         JBVoltarLP.setText("Voltar");
         JBVoltarLP.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -146,193 +205,197 @@ public class FrmListadeProduto extends javax.swing.JFrame {
             }
         });
 
-        JLCategoria.setText("Categoria:");
+        JBReajustar.setText("Reajustar Preços");
+        JBReajustar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBReajustarActionPerformed(evt);
+            }
+        });
+
+        JTTabelaProdutos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "ID", "Nome", "Quantidade", "Unidade", "Categoria"
+            }
+        ));
+        JSPTabeladeProdutos.setViewportView(JTTabelaProdutos);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator1)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(JLBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(JTFBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(JLCategoria)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(JCBCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(39, 39, 39)
-                        .addComponent(JBFiltrar)
-                        .addGap(185, 185, 185))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(JSPTabeladeProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 523, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(137, 137, 137))))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 743, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(319, 319, 319)
-                        .addComponent(jLabel1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(114, 114, 114)
-                        .addComponent(JBNovoProduto)
-                        .addGap(40, 40, 40)
-                        .addComponent(JBEditar)
-                        .addGap(34, 34, 34)
-                        .addComponent(JBExcluir)
-                        .addGap(18, 18, 18)
-                        .addComponent(JBVoltarLP)
-                        .addGap(18, 18, 18)
-                        .addComponent(JBReajustar)))
-                .addContainerGap(124, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(131, 131, 131)
+                                .addComponent(JLBuscar1, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(JTFBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(52, 52, 52))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(111, 111, 111)
+                                .addComponent(JBNovoProduto)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(JBEditar)
+                                .addGap(38, 38, 38)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(JLCategoria1)
+                            .addComponent(JBExcluir))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(33, 33, 33)
+                                .addComponent(JCBCategoria1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(48, 48, 48)
+                                .addComponent(JBFiltrar))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(36, 36, 36)
+                                .addComponent(JBVoltarLP)
+                                .addGap(18, 18, 18)
+                                .addComponent(JBReajustar)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(274, 274, 274))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(113, 113, 113)
+                    .addComponent(JSPTabeladeProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 523, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(113, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addContainerGap()
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(JLBuscar)
-                    .addComponent(JLCategoria)
+                    .addComponent(JLBuscar1)
                     .addComponent(JTFBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(JCBCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(JLCategoria1)
+                    .addComponent(JCBCategoria1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(JBFiltrar))
-                .addGap(31, 31, 31)
-                .addComponent(JSPTabeladeProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(43, 43, 43)
+                .addGap(379, 379, 379)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(JBReajustar)
-                    .addComponent(JBVoltarLP)
-                    .addComponent(JBExcluir)
+                    .addComponent(JBNovoProduto)
                     .addComponent(JBEditar)
-                    .addComponent(JBNovoProduto))
-                .addContainerGap(60, Short.MAX_VALUE))
+                    .addComponent(JBExcluir)
+                    .addComponent(JBVoltarLP)
+                    .addComponent(JBReajustar))
+                .addContainerGap(73, Short.MAX_VALUE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(142, 142, 142)
+                    .addComponent(JSPTabeladeProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(143, Short.MAX_VALUE)))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-private void carregarCategorias() {
-        try {
-            JCBCategoria.removeAllItems();
-            JCBCategoria.addItem("Todas");
-
-            List<Categoria> categorias = estoqueService.listarCategorias();
-            for (Categoria c : categorias) {
-                JCBCategoria.addItem(c.getNome());
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage());
-        }
-    }
-
-public void carregarTabelaProdutos() {
-        try {
-            String filtroNome = JTBuscar.getText().trim();
-            String filtroCategoria = (String) JCBCategoria.getSelectedItem();
-
-            List<Produto> lista = estoqueService.listarProdutos();
-
-            DefaultTableModel model =
-                    (DefaultTableModel) JTabelaProdutos.getModel();
-
-            model.setRowCount(0);
-
-            for (Produto p : lista) {
-
-                boolean passaNome = filtroNome.isEmpty()
-                        || p.getNome().toLowerCase().contains(filtroNome.toLowerCase());
-
-                boolean passaCategoria = filtroCategoria.equals("Todas")
-                        || p.getCategoria().getNome().equals(filtroCategoria);
-
-                if (passaNome && passaCategoria) {
-                    model.addRow(new Object[]{
-                        p.getId_produto(),
-                        p.getNome(),
-                        p.getCategoria().getNome(),
-                        p.getQuantidade(),
-                        p.getQuantidade_minima(),
-                        p.getPreco()
-                    });
-                }
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar tabela: " + e.getMessage());
-        }
-    }
-    private void JBReajustarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBReajustarActionPerformed
-         FrmReajustarPreco tela = new FrmReajustarPreco(this);
-        tela.setVisible(true);
-        this.setVisible(false);
-    }//GEN-LAST:event_JBReajustarActionPerformed
 
     private void JTFBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFBuscarActionPerformed
-        carregarTabelaProdutos();
+        // TODO add your handling code here:
     }//GEN-LAST:event_JTFBuscarActionPerformed
 
     private void JCBCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JCBCategoriaActionPerformed
-        carregarTabelaProdutos();
+        // TODO add your handling code here:
     }//GEN-LAST:event_JCBCategoriaActionPerformed
 
+    private void JCBCategoria1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JCBCategoria1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_JCBCategoria1ActionPerformed
+
     private void JBFiltrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFiltrarActionPerformed
-        carregarTabelaProdutos();
+        String nomeBuscado = JTFBuscar.getText().trim();
+        String categoriaSelecionada = JCBCategoria1.getSelectedItem() != null ? 
+            JCBCategoria1.getSelectedItem().toString() : "Todas";
+
+        try {
+            EstoqueService service = clienteRMI.getService();
+            List<Produto> produtos = service.listarProdutos();
+            List<Produto> produtosFiltrados = new ArrayList<>();
+
+            for (Produto p : produtos) {
+                boolean matchNome = nomeBuscado.isEmpty() || 
+                    p.getNome().toLowerCase().contains(nomeBuscado.toLowerCase());
+                boolean matchCategoria = categoriaSelecionada.equals("Todas") || 
+                    p.getCategoria().equals(categoriaSelecionada);
+                
+                if (matchNome && matchCategoria) {
+                    produtosFiltrados.add(p);
+                }
+            }
+
+            DefaultTableModel modelo = (DefaultTableModel) JTTabelaProdutos.getModel();
+            modelo.setRowCount(0);
+
+            for (Produto p : produtosFiltrados) {
+                modelo.addRow(new Object[]{
+                    p.getId(),
+                    p.getNome(),
+                    p.getQuantidade(),
+                    p.getUnidade(),
+                    p.getCategoria()
+                });
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao filtrar produtos: " + e.getMessage());
+        }
     }//GEN-LAST:event_JBFiltrarActionPerformed
 
-    private void JBNovoProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBNovoProdutoActionPerformed
-        FrmCadastrodeProduto tela = new FrmCadastrodeProduto(this.clienteRMI);
-        tela.setVisible(true);
-    }//GEN-LAST:event_JBNovoProdutoActionPerformed
-
     private void JBEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBEditarActionPerformed
-        int linha = JTabelaProdutos.getSelectedRow();
+        int linhaSelecionada = JTTabelaProdutos.getSelectedRow();
 
-        if (linha < 0) {
+        if (linhaSelecionada == -1) {
             JOptionPane.showMessageDialog(this, "Selecione um produto para editar.");
             return;
         }
-
-        int id = (int) JTabelaProdutos.getValueAt(linha, 0);
+        int idProduto = Integer.parseInt(JTTabelaProdutos.getValueAt(linhaSelecionada, 0).toString());
 
         try {
-            Produto p = estoqueService.buscarProduto(id);
-            FrmCadastrodeProduto tela = new FrmCadastrodeProduto(this.clienteRMI, p);
-            tela.setVisible(true);
+            EstoqueService service = clienteRMI.getService();
+            Produto produto = service.buscarProdutoPorId(idProduto);
 
+            FrmCadastrodeProduto editarProduto = new FrmCadastrodeProduto(clienteRMI, this, produto);
+            editarProduto.setVisible(true);
+
+            this.setVisible(false);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar produto: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao buscar produto: " + e.getMessage());
         }
     }//GEN-LAST:event_JBEditarActionPerformed
 
     private void JBExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBExcluirActionPerformed
-        int linha = JTabelaProdutos.getSelectedRow();
+        int linhaSelecionada = JTTabelaProdutos.getSelectedRow();
 
-        if (linha < 0) {
+        if (linhaSelecionada != -1) {
+            int confirmacao = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja excluir este produto?", "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
+
+            if (confirmacao == JOptionPane.YES_OPTION) {
+                int idProduto = (int) JTTabelaProdutos.getValueAt(linhaSelecionada, 0);
+
+                try {
+                    EstoqueService service = clienteRMI.getService();
+                    service.excluirProduto(idProduto);
+                    JOptionPane.showMessageDialog(this, "Produto excluído com sucesso!");
+                    carregarTabelaProdutos();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Erro ao excluir o produto: " + e.getMessage());
+                }
+            }
+        } else {
             JOptionPane.showMessageDialog(this, "Selecione um produto para excluir.");
-            return;
-        }
-
-        int id = (int) JTabelaProdutos.getValueAt(linha, 0);
-
-        int confirmar = JOptionPane.showConfirmDialog(this,
-                "Tem certeza que deseja excluir este produto?",
-                "Confirmar",
-                JOptionPane.YES_NO_OPTION);
-
-        if (confirmar != JOptionPane.YES_OPTION) return;
-
-        try {
-            estoqueService.excluirProduto(id);
-            carregarTabelaProdutos();
-            JOptionPane.showMessageDialog(this, "Produto excluído com sucesso!");
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao excluir: " + e.getMessage());
         }
     }//GEN-LAST:event_JBExcluirActionPerformed
 
@@ -340,6 +403,18 @@ public void carregarTabelaProdutos() {
         janelaAnterior.setVisible(true);
         dispose();
     }//GEN-LAST:event_JBVoltarLPActionPerformed
+
+    private void JBReajustarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBReajustarActionPerformed
+        FrmReajustarPreco reajuste = new FrmReajustarPreco(clienteRMI, this);
+        reajuste.setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_JBReajustarActionPerformed
+    
+    private void JBNovoProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBNovoProdutoActionPerformed
+        FrmCadastrodeProduto novoProduto = new FrmCadastrodeProduto(clienteRMI, this, null);
+        novoProduto.setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_JBNovoProdutoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -384,8 +459,11 @@ public void carregarTabelaProdutos() {
     private javax.swing.JButton JBReajustar;
     private javax.swing.JButton JBVoltarLP;
     private javax.swing.JComboBox<String> JCBCategoria;
+    private javax.swing.JComboBox<String> JCBCategoria1;
     private javax.swing.JLabel JLBuscar;
+    private javax.swing.JLabel JLBuscar1;
     private javax.swing.JLabel JLCategoria;
+    private javax.swing.JLabel JLCategoria1;
     private javax.swing.JScrollPane JSPTabeladeProdutos;
     private javax.swing.JTextField JTFBuscar;
     private javax.swing.JTable JTTabelaProdutos;
