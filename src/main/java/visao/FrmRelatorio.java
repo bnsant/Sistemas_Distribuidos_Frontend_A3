@@ -1,14 +1,14 @@
 
 package visao;
 
-        import cliente.ClienteRMI;
-        import interfaces.EstoqueService;
-        import javax.swing.JOptionPane;
+       import cliente.ClienteRMI;
+import service.EstoqueService;
+import javax.swing.JOptionPane;
 
 public class FrmRelatorio extends javax.swing.JFrame {
     
-private ClienteRMI clienteRMI;
-private EstoqueService estoqueService;
+    private ClienteRMI clienteRMI;
+    private EstoqueService estoqueService;
    
     public FrmRelatorio() {
         initComponents();
@@ -21,18 +21,21 @@ private EstoqueService estoqueService;
         conectarServidorRMI();
     }
 
-    private void conectarServidorRMI() {
+     private void conectarServidorRMI() {
         try {
-            if (this.clienteRMI == null) {
-                this.clienteRMI = new ClienteRMI();
-            }
-            if (this.clienteRMI.conectar()) {
-                this.estoqueService = this.clienteRMI.getService();
+            if (clienteRMI == null)
+                clienteRMI = new ClienteRMI();
+
+            if (clienteRMI.conectar()) {
+                estoqueService = clienteRMI.getService();
             } else {
-                JOptionPane.showMessageDialog(this, "Não foi possível conectar ao servidor RMI.");
+                JOptionPane.showMessageDialog(this,
+                        "Não foi possível conectar ao servidor RMI.");
             }
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao conectar ao servidor: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao conectar ao servidor: " + e.getMessage());
         }
     }
 
@@ -45,7 +48,7 @@ private EstoqueService estoqueService;
         jSeparator1 = new javax.swing.JSeparator();
         JBFechar = new javax.swing.JToggleButton();
         JBListadePreco = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        JBBalanco = new javax.swing.JButton();
         JBProdutosAbaixo = new javax.swing.JButton();
         JBQuantidadeProdutoCategoria = new javax.swing.JButton();
 
@@ -69,10 +72,10 @@ private EstoqueService estoqueService;
             }
         });
 
-        jButton1.setText("Balanço Físico-Financeiro");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        JBBalanco.setText("Balanço Físico-Financeiro");
+        JBBalanco.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                JBBalancoActionPerformed(evt);
             }
         });
 
@@ -109,7 +112,7 @@ private EstoqueService estoqueService;
                                     .addComponent(jLabel1)
                                     .addGap(68, 68, 68))
                                 .addComponent(JBListadePreco, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(JBBalanco, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(JBProdutosAbaixo, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)))))
                 .addContainerGap(135, Short.MAX_VALUE))
         );
@@ -123,7 +126,7 @@ private EstoqueService estoqueService;
                 .addGap(39, 39, 39)
                 .addComponent(JBListadePreco)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
+                .addComponent(JBBalanco)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(JBProdutosAbaixo)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -149,40 +152,23 @@ private EstoqueService estoqueService;
     }//GEN-LAST:event_JBFecharActionPerformed
 
     private void JBListadePrecoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBListadePrecoActionPerformed
-        try {
-            FrmListaDePreco tela = new FrmListaDePreco(this.clienteRMI);
-            tela.setVisible(true);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao abrir Lista de Preço: " + e.getMessage());
-        }
+        FrmListadePreco tela = new FrmListadePreco(clienteRMI);
+        tela.setVisible(true);
     }//GEN-LAST:event_JBListadePrecoActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        FrmBalancoFisico objeto = new FrmBalancoFisico();
-        objeto.setVisible(true);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void JBBalancoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBBalancoActionPerformed
+        FrmBalancoFisico tela = new FrmBalancoFisico(clienteRMI);
+        tela.setVisible(true);
+    }//GEN-LAST:event_JBBalancoActionPerformed
 
     private void JBProdutosAbaixoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBProdutosAbaixoActionPerformed
-        try {
-            FrmProdutoAbaixoDoMin tela = new FrmProdutoAbaixoDoMin(this.clienteRMI);
-            tela.setVisible(true);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao abrir Produtos Abaixo do Mínimo: " + e.getMessage());
-        }
+         FrmProdutoAbaixoDoMin tela = new FrmProdutoAbaixoDoMin(clienteRMI);
+        tela.setVisible(true);
     }//GEN-LAST:event_JBProdutosAbaixoActionPerformed
 
     private void JBQuantidadeProdutoCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBQuantidadeProdutoCategoriaActionPerformed
-        try {
-            FrmQuantidadeDeProduto tela = new FrmQuantidadeDeProduto(this.clienteRMI);
-            tela.setVisible(true);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao abrir Quantidade por Categoria: " + e.getMessage());
-        }try {
-            FrmQuantidadeDeProduto tela = new FrmQuantidadeDeProduto(this.clienteRMI);
-            tela.setVisible(true);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao abrir Quantidade por Categoria: " + e.getMessage());
-        }
+        FrmQuantidadeDeProduto tela = new FrmQuantidadeDeProduto(clienteRMI);
+        tela.setVisible(true);
     }//GEN-LAST:event_JBQuantidadeProdutoCategoriaActionPerformed
 
     /**
@@ -221,11 +207,11 @@ private EstoqueService estoqueService;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton JBBalanco;
     private javax.swing.JToggleButton JBFechar;
     private javax.swing.JButton JBListadePreco;
     private javax.swing.JButton JBProdutosAbaixo;
     private javax.swing.JButton JBQuantidadeProdutoCategoria;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JSeparator jSeparator1;
     // End of variables declaration//GEN-END:variables

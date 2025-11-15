@@ -2,7 +2,7 @@
 package visao;
 
 import cliente.ClienteRMI;
-import interfaces.EstoqueService;
+import service.EstoqueService;
 import javax.swing.JOptionPane;
  
 public class FrmTelaPrincipal extends javax.swing.JFrame {

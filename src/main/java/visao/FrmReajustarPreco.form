@@ -99,29 +99,6 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JSeparator" name="jSeparator1">
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLabel2">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Produto:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLabel3">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Pre&#xe7;o atual:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLabel4">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Percentual:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="JTFPrecoAtual">
-    </Component>
-    <Component class="javax.swing.JTextField" name="JTFPercentual">
-    </Component>
-    <Component class="javax.swing.JSeparator" name="jSeparator2">
-    </Component>
     <Component class="javax.swing.JButton" name="JBAumentar">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#x2795; Aumentar"/>
@@ -171,6 +148,29 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="JBVoltarActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JSeparator" name="jSeparator1">
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Produto:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Pre&#xe7;o atual:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Percentual:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="JTFPrecoAtual">
+    </Component>
+    <Component class="javax.swing.JTextField" name="JTFPercentual">
+    </Component>
+    <Component class="javax.swing.JSeparator" name="jSeparator2">
     </Component>
   </SubComponents>
 </Form>

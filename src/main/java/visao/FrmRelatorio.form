@@ -40,7 +40,7 @@
                                   <EmptySpace min="-2" pref="68" max="-2" attributes="0"/>
                               </Group>
                               <Component id="JBListadePreco" alignment="0" max="32767" attributes="0"/>
-                              <Component id="jButton1" alignment="0" max="32767" attributes="0"/>
+                              <Component id="JBBalanco" alignment="0" max="32767" attributes="0"/>
                               <Component id="JBProdutosAbaixo" alignment="1" pref="238" max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -60,7 +60,7 @@
               <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
               <Component id="JBListadePreco" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+              <Component id="JBBalanco" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="JBProdutosAbaixo" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -102,12 +102,12 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="JBListadePrecoActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton1">
+    <Component class="javax.swing.JButton" name="JBBalanco">
       <Properties>
         <Property name="text" type="java.lang.String" value="Balan&#xe7;o F&#xed;sico-Financeiro"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="JBBalancoActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="JBProdutosAbaixo">

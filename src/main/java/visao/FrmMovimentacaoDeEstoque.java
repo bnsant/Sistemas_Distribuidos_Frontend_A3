@@ -2,11 +2,11 @@
 package visao;
 
 import cliente.ClienteRMI;
-import interfaces.EstoqueService;
+import service.EstoqueService;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import modelo.Movimentacao;
+import modelo.RegistroMovimentacao;
 import modelo.Produto;
 
 
@@ -21,17 +21,18 @@ public class FrmMovimentacaoDeEstoque extends javax.swing.JFrame {
         conectarServidorRMI();
         carregarProdutos();
         carregarMovimentacoes();
+        JRBEntrada.setSelected(true);
     }
     
     public FrmMovimentacaoDeEstoque(ClienteRMI clienteRMI) {
         initComponents();
-        this.clienteRMI = clienteRMI;
         conectarServidorRMI();
         carregarProdutos();
         carregarMovimentacoes();
+        JRBEntrada.setSelected(true);
     }
     
-    private void conectarServidorRMI() {
+   private void conectarServidorRMI() {
         try {
             if (this.clienteRMI == null)
                 this.clienteRMI = new ClienteRMI();
@@ -240,36 +241,48 @@ private void carregarProdutos() {
         }
     }
 
-private void carregarMovimentacoes() {
-        try {
-            DefaultTableModel model =
-                (DefaultTableModel) JTMovimentacao.getModel();
+    private void carregarMovimentacoes() {
+    try {
+        DefaultTableModel model =
+            (DefaultTableModel) JTMovimentacao.getModel();
 
-            model.setRowCount(0);
+        model.setRowCount(0);
 
-            List<Movimentacao> movs = estoqueService.listarMovimentacoes();
+        // lista de movimentações
+        List<RegistroMovimentacao> movs = estoqueService.listarMovimentacoes();
+        // lista de produtos (para buscar nome, quantidade etc.)
+        List<Produto> produtos = estoqueService.listarProdutos();
 
-            for (Movimentacao m : movs) {
-                model.addRow(new Object[]{
-                    m.getId(),
-                    m.getProduto().getNome(),
-                    m.getTipo(),
-                    m.getQuantidade(),
-                    m.getData()
-                });
-            }
+        for (RegistroMovimentacao m : movs) {
 
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao carregar movimentações: " + e.getMessage());
+            // localiza o produto baseado no produtoId
+            Produto p = produtos.stream()
+                    .filter(x -> x.getId() == m.getProdutoId())
+                    .findFirst()
+                    .orElse(null);
+
+            String nomeProduto = (p != null ? p.getNome() : "Desconhecido");
+            int saldo = (p != null ? p.getQuantidade() : 0);
+
+            model.addRow(new Object[]{
+                m.getDataMovimentacao(),
+                nomeProduto,
+                m.getTipoMovimentacao(),
+                m.getQuantidade(),
+                saldo
+            });
         }
-    }
 
-    
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+            "Erro ao carregar movimentações: " + e.getMessage());
+    }
+}
+
     private void limparCampos() {
         JTFQuantidade.setText("");
         JTFData.setText("");
-        JREntrada.setSelected(true);
+        JRBEntrada.setSelected(true);
     }
     private void JBLimparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBLimparActionPerformed
         limparCampos();
@@ -277,7 +290,6 @@ private void carregarMovimentacoes() {
 
     private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed
         this.dispose();
-        janelaAnterior.setVisible(true);
     }//GEN-LAST:event_JBSairActionPerformed
 
     private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jScrollPane1AncestorAdded
@@ -285,9 +297,7 @@ private void carregarMovimentacoes() {
     }//GEN-LAST:event_jScrollPane1AncestorAdded
 
     private void JBRegistrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRegistrarActionPerformed
-        private void JBRegistrarActionPerformed(java.awt.event.ActionEvent evt) {
-
-        try {
+       try {
             String produtoNome = (String) JCBProduto.getSelectedItem();
             if (produtoNome == null) {
                 JOptionPane.showMessageDialog(this, "Selecione um produto.");
@@ -305,10 +315,21 @@ private void carregarMovimentacoes() {
                 return;
             }
 
-            int qtd = Integer.parseInt(JTFQuantidade.getText());
-            String data = JTFData.getText();
+            int qtd;
+            try {
+                qtd = Integer.parseInt(JTFQuantidade.getText());
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(this, "Quantidade inválida.");
+                return;
+            }
 
-            String tipo = JREntrada.isSelected() ? "Entrada" : "Saída";
+            String data = JTFData.getText().trim();
+            if (data.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Informe a data.");
+                return;
+            }
+
+            String tipo = JRBEntrada.isSelected() ? "Entrada" : "Saída";
 
             if (tipo.equals("Saída") && qtd > produto.getQuantidade()) {
                 JOptionPane.showMessageDialog(this,
@@ -316,7 +337,6 @@ private void carregarMovimentacoes() {
                 return;
             }
 
-            
             int novoEstoque = tipo.equals("Entrada")
                     ? produto.getQuantidade() + qtd
                     : produto.getQuantidade() - qtd;
@@ -324,12 +344,12 @@ private void carregarMovimentacoes() {
             produto.setQuantidade(novoEstoque);
             estoqueService.atualizarProduto(produto);
 
-            
-            Movimentacao mov = new Movimentacao();
-            mov.setProduto(produto);
-            mov.setQuantidade(qtd);
-            mov.setTipo(tipo);
-            mov.setData(data);
+            RegistroMovimentacao mov = new RegistroMovimentacao();
+mov.setProdutoId(produto.getId());
+mov.setQuantidade(qtd);
+mov.setTipoMovimentacao(tipo);
+mov.setDataMovimentacao(data);
+mov.setObservacao("");
 
             estoqueService.registrarMovimentacao(mov);
 
