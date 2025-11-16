@@ -2,8 +2,9 @@
 package visao;
 
 import cliente.ClienteRMI;
-import interfaces.EstoqueService;
+import service.EstoqueService;
 import java.util.List;
+import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import modelo.Categoria;
@@ -15,16 +16,26 @@ public class FrmListadeProduto extends javax.swing.JFrame {
     private ClienteRMI clienteRMI;
     private EstoqueService estoqueService;
 
-    
+    private List<Produto> produtos;
+    private List<Categoria> categorias;
+
     public FrmListadeProduto() {
         initComponents();
-        conectarServidorRMI();
-        carregarCategorias();
-        carregarTabelaProdutos();
+        setLocationRelativeTo(null);
+
+        clienteRMI = new ClienteRMI();
+        if (clienteRMI.conectar()) {
+            estoqueService = clienteRMI.getService();
+            carregarCategorias();
+            carregarTabelaProdutos();
+        } else {
+            JOptionPane.showMessageDialog(null, "Erro ao conectar ao servidor!");
+        }
     }
-    
+
     public FrmListadeProduto(ClienteRMI clienteRMI) {
         initComponents();
+        setLocationRelativeTo(null);
         this.clienteRMI = clienteRMI;
         conectarServidorRMI();
         carregarCategorias();
@@ -47,6 +58,70 @@ public class FrmListadeProduto extends javax.swing.JFrame {
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
+        }
+    }
+
+    /** Carrega as categorias no combo */
+    private void carregarCategorias() {
+        try {
+            categorias = estoqueService.listarCategorias();
+            JCBCategoria.removeAllItems();
+            JCBCategoria.addItem("Todas");
+
+            for (Categoria c : categorias) {
+                JCBCategoria.addItem(c.getNomeCategoria());
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Erro ao carregar categorias: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Carrega os produtos do servidor, aplicando filtro de texto e categoria,
+     * e preenche a tabela JTTabelaProdutos.
+     */
+    public void carregarTabelaProdutos() {
+        if (estoqueService == null) return;
+
+        try {
+            List<Produto> todos = estoqueService.listarProdutos();
+            produtos = new ArrayList<>();
+
+            String busca = JTFBuscar.getText().trim().toLowerCase();
+            String categoriaSelecionada = (String) JCBCategoria.getSelectedItem();
+
+            DefaultTableModel model =
+                    (DefaultTableModel) JTTabelaProdutos.getModel();
+            model.setRowCount(0);
+
+            for (Produto p : todos) {
+                boolean passaTexto =
+                        busca.isEmpty() ||
+                        p.getNome().toLowerCase().contains(busca);
+
+                boolean passaCategoria =
+                        categoriaSelecionada == null ||
+                        categoriaSelecionada.equals("Todas") ||
+                        categoriaSelecionada.equalsIgnoreCase(p.getCategoria());
+
+                if (passaTexto && passaCategoria) {
+                    produtos.add(p); // mantém lista sincronizada com a tabela
+
+                    model.addRow(new Object[] {
+                        p.getId(),
+                        p.getNome(),
+                        p.getQuantidade(),
+                        p.getUnidade(),
+                        p.getCategoria()
+                    });
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Erro ao carregar produtos: " + e.getMessage());
         }
     }
 
@@ -215,61 +290,10 @@ public class FrmListadeProduto extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-private void carregarCategorias() {
-        try {
-            JCBCategoria.removeAllItems();
-            JCBCategoria.addItem("Todas");
 
-            List<Categoria> categorias = estoqueService.listarCategorias();
-            for (Categoria c : categorias) {
-                JCBCategoria.addItem(c.getNome());
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage());
-        }
-    }
-
-public void carregarTabelaProdutos() {
-        try {
-            String filtroNome = JTBuscar.getText().trim();
-            String filtroCategoria = (String) JCBCategoria.getSelectedItem();
-
-            List<Produto> lista = estoqueService.listarProdutos();
-
-            DefaultTableModel model =
-                    (DefaultTableModel) JTabelaProdutos.getModel();
-
-            model.setRowCount(0);
-
-            for (Produto p : lista) {
-
-                boolean passaNome = filtroNome.isEmpty()
-                        || p.getNome().toLowerCase().contains(filtroNome.toLowerCase());
-
-                boolean passaCategoria = filtroCategoria.equals("Todas")
-                        || p.getCategoria().getNome().equals(filtroCategoria);
-
-                if (passaNome && passaCategoria) {
-                    model.addRow(new Object[]{
-                        p.getId_produto(),
-                        p.getNome(),
-                        p.getCategoria().getNome(),
-                        p.getQuantidade(),
-                        p.getQuantidade_minima(),
-                        p.getPreco()
-                    });
-                }
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar tabela: " + e.getMessage());
-        }
-    }
     private void JBReajustarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBReajustarActionPerformed
-         FrmReajustarPreco tela = new FrmReajustarPreco(this);
+         FrmReajustarPreco tela = new FrmReajustarPreco(this.clienteRMI);
         tela.setVisible(true);
-        this.setVisible(false);
     }//GEN-LAST:event_JBReajustarActionPerformed
 
     private void JTFBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFBuscarActionPerformed
@@ -285,39 +309,36 @@ public void carregarTabelaProdutos() {
     }//GEN-LAST:event_JBFiltrarActionPerformed
 
     private void JBNovoProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBNovoProdutoActionPerformed
-        FrmCadastrodeProduto tela = new FrmCadastrodeProduto(this.clienteRMI);
-        tela.setVisible(true);
+       FrmCadastrodeProduto tela = new FrmCadastrodeProduto(clienteRMI, null, null, this);
+tela.setVisible(true);
     }//GEN-LAST:event_JBNovoProdutoActionPerformed
 
     private void JBEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBEditarActionPerformed
-        int linha = JTabelaProdutos.getSelectedRow();
+        int linha = JTTabelaProdutos.getSelectedRow();
 
-        if (linha < 0) {
-            JOptionPane.showMessageDialog(this, "Selecione um produto para editar.");
-            return;
-        }
+    if (linha < 0) {
+        JOptionPane.showMessageDialog(this, "Selecione um produto.");
+        return;
+    }
 
-        int id = (int) JTabelaProdutos.getValueAt(linha, 0);
+    Produto produtoSelecionado = produtos.get(linha);
 
-        try {
-            Produto p = estoqueService.buscarProduto(id);
-            FrmCadastrodeProduto tela = new FrmCadastrodeProduto(this.clienteRMI, p);
-            tela.setVisible(true);
+    FrmCadastrodeProduto tela =
+            new FrmCadastrodeProduto(clienteRMI, produtoSelecionado, null, this);
 
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar produto: " + e.getMessage());
-        }
+    tela.setVisible(true);
+    this.setVisible(false);
     }//GEN-LAST:event_JBEditarActionPerformed
 
     private void JBExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBExcluirActionPerformed
-        int linha = JTabelaProdutos.getSelectedRow();
+        int linha = JTTabelaProdutos.getSelectedRow();
 
         if (linha < 0) {
             JOptionPane.showMessageDialog(this, "Selecione um produto para excluir.");
             return;
         }
 
-        int id = (int) JTabelaProdutos.getValueAt(linha, 0);
+        int id = (int) JTTabelaProdutos.getValueAt(linha, 0);
 
         int confirmar = JOptionPane.showConfirmDialog(this,
                 "Tem certeza que deseja excluir este produto?",
@@ -337,7 +358,6 @@ public void carregarTabelaProdutos() {
     }//GEN-LAST:event_JBExcluirActionPerformed
 
     private void JBVoltarLPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBVoltarLPActionPerformed
-        janelaAnterior.setVisible(true);
         dispose();
     }//GEN-LAST:event_JBVoltarLPActionPerformed
 

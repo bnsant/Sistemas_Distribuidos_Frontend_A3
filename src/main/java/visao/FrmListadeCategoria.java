@@ -35,10 +35,19 @@ public class FrmListadeCategoria extends javax.swing.JFrame {
      * Construtor padrão da classe. Inicializa componentes, conecta ao servidor e carrega categorias.
      */
     public FrmListadeCategoria() {
-        initComponents();
-        conectarServidorRMI();
-        carregarCategorias();
+         initComponents();
+        setLocationRelativeTo(null);
+
+        clienteRMI = new ClienteRMI();
+        if (clienteRMI.conectar()) {
+            estoqueService = clienteRMI.getService();
+            carregarCategorias();
+        } else {
+            JOptionPane.showMessageDialog(null, "Erro ao conectar ao servidor.");
+        }
     }
+    
+    
     
     /**
      * Construtor com cliente RMI pré-configurado.
@@ -192,28 +201,27 @@ public class FrmListadeCategoria extends javax.swing.JFrame {
      * Carrega a lista de categorias do servidor e exibe na tabela.
      */
 private void carregarCategorias() {
-    try {
-        categorias = estoqueService.listarCategorias();
+        try {
+            categorias = estoqueService.listarCategorias();
 
-        DefaultTableModel model =
-            (DefaultTableModel) JTListaCategoria.getModel();
+            DefaultTableModel model = (DefaultTableModel) JTListaCategoria.getModel();
+            model.setRowCount(0);
 
-        model.setRowCount(0);
+            for (Categoria c : categorias) {
+                model.addRow(new Object[]{
+                    c.getId(),
+                    c.getNomeCategoria(),
+                    c.getTamanho(),
+                    c.getEmbalagem()
+                });
+            }
 
-        for (Categoria c : categorias) {
-            model.addRow(new Object[]{
-                c.getId(),
-                c.getNomeCategoria(),
-                c.getTamanho(),
-                c.getEmbalagem()
-            });
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Erro ao carregar categorias: " + e.getMessage());
         }
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this,
-            "Erro ao carregar categorias: " + e.getMessage());
     }
-}
+
 
     /**
      * Manipula ação do botão Voltar. Fecha a tela.
@@ -229,7 +237,7 @@ private void carregarCategorias() {
      */
     private void JBAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAdicionarActionPerformed
         FrmCadastroDeCategoria tela = new FrmCadastroDeCategoria(clienteRMI);
-    tela.setVisible(true);
+        tela.setVisible(true);
     }//GEN-LAST:event_JBAdicionarActionPerformed
 
     /**
@@ -245,20 +253,12 @@ private void carregarCategorias() {
             return;
         }
 
-        int id = (int) JTListaCategoria.getValueAt(linha, 0);
+        Categoria cSelecionada = categorias.get(linha);
 
-        try {
-            Categoria c = estoqueService.buscarCategoria(id);
+        FrmCadastroDeCategoria tela =
+                new FrmCadastroDeCategoria(clienteRMI, cSelecionada);
 
-            FrmCadastroDeCategoria tela =
-    new FrmCadastroDeCategoria(clienteRMI, c);
-
-tela.setVisible(true);
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                "Erro ao carregar categoria: " + e.getMessage());
-        }
+        tela.setVisible(true);
     }//GEN-LAST:event_JBEditarActionPerformed
 
     /**
@@ -274,19 +274,16 @@ tela.setVisible(true);
             return;
         }
 
-        int id = (int) JTListaCategoria.getValueAt(linha, 0);
+        Categoria c = categorias.get(linha);
 
-        int confirmar = JOptionPane.showConfirmDialog(this,
+        if (JOptionPane.showConfirmDialog(this,
                 "Tem certeza que deseja excluir esta categoria?",
-                "Confirmar",
-                JOptionPane.YES_NO_OPTION);
-
-        if (confirmar != JOptionPane.YES_OPTION) return;
+                "Confirmar", JOptionPane.YES_NO_OPTION)
+                != JOptionPane.YES_OPTION) return;
 
         try {
-            estoqueService.excluirCategoria(id);
+            estoqueService.excluirCategoria(c.getId());
             carregarCategorias();
-
             JOptionPane.showMessageDialog(this,
                     "Categoria excluída com sucesso!");
 
